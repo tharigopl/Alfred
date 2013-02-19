@@ -30,7 +30,7 @@ namespace Bot.Commands
 
         private IEnumerable<string> GetBuildStatus()
         {
-            var path = @"C:\Users\Administrator\Desktop\tcfeed.xml";
+            var path = @"http://tk421.trad.tradestation.com:8585/guestAuth/feed.html?buildTypeId=bt39&amp;itemsType=builds&amp;userKey=guest";
             var reader = XmlReader.Create(path);
             var feed = SyndicationFeed.Load(reader);
             var build = feed.Items.First();
