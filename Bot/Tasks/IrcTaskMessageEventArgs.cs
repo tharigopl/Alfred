@@ -13,7 +13,7 @@ namespace Bot.Tasks
         public IrcTaskMessageEventArgs(IEnumerable<string> messages)
         {
             if (messages == null)
-                throw new ArgumentNullException("messages");
+                messages = new string[0];
 
             this.Messages = messages;
         }
