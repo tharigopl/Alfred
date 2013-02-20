@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Configuration;
 using Bot;
 using Bot.Tasks;
@@ -16,7 +11,7 @@ namespace BotConsoleHost
         {
             var config = CreateConfiguration();
             var bot = new IrcBot(config);
-            var uriString = ConfigurationSettings.AppSettings["feed"];
+            var uriString = ConfigurationManager.AppSettings["feed"];
             bot.AddTask(new IrcTeamCityBuildStatusTask(new Uri(uriString)));
             bot.Run().Wait();
         }
@@ -24,10 +19,10 @@ namespace BotConsoleHost
         static IrcBotConfiguration CreateConfiguration()
         {
             return new IrcBotConfiguration {
-                NickName = ConfigurationSettings.AppSettings["nick"],
-                HostName = ConfigurationSettings.AppSettings["host"],
-                Port = int.Parse(ConfigurationSettings.AppSettings["port"]),
-                Channel = ConfigurationSettings.AppSettings["channel"]
+                NickName = ConfigurationManager.AppSettings["nick"],
+                HostName = ConfigurationManager.AppSettings["host"],
+                Port = int.Parse(ConfigurationManager.AppSettings["port"]),
+                Channel = ConfigurationManager.AppSettings["channel"]
             };
         }
     }
