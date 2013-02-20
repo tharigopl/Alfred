@@ -12,8 +12,9 @@ namespace Bot.Tasks
 {
     public class IrcTeamCityBuildStatusTask : IrcTask
     {
-        private Uri feedUri;
+        private readonly Uri feedUri;
         private readonly IIrcMessageFormatter<SyndicationItem> formatter;
+        private int lastBuildNumberReported = 0;
 
         public IrcTeamCityBuildStatusTask(Uri feedUri)
         {
@@ -21,10 +22,8 @@ namespace Bot.Tasks
 
             this.feedUri = feedUri;
             this.Name = "TeamCityBuild";
-            this.action = () => this.Run();
+            this.action = this.Run;
         }
-
-        private int lastBuildNumberReported = 0;
 
         public void Run()
         {
@@ -38,12 +37,14 @@ namespace Bot.Tasks
                     SendMessages(messages);
                 }
 
-                Thread.Sleep(5000);
+                Thread.Sleep(30000);
             }
         }
 
         private bool IsNewBuild(SyndicationItem build)
         {
+            if (build == null) return false;
+
             var buildNumber = GetBuildNumberFromBuild(build);
             var isNew = (buildNumber > lastBuildNumberReported);
             lastBuildNumberReported = buildNumber;
@@ -62,10 +63,10 @@ namespace Bot.Tasks
 
         private SyndicationItem GetMostRecentBuild()
         {
-            var messages = new List<string>();
-            //var path = @"C:\Users\Administrator\Desktop\tcfeed.xml";
             var reader = XmlReader.Create(this.feedUri.ToString());
             var feed = SyndicationFeed.Load(reader);
+
+            if (feed == null) return null;
 
             return feed.Items.First();
         }
