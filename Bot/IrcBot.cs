@@ -12,8 +12,6 @@ namespace Bot
 {
     public class IrcBot
     {
-        //private readonly IrcBotConfiguration configuration;
-
         private readonly string nickName;
         private readonly string userName;
         private readonly string realName;
@@ -26,6 +24,7 @@ namespace Bot
         private readonly List<IIrcTask> tasks;
 
         private readonly IrcClient client;
+        private bool isRegistered;
 
         public IrcBot(IrcBotConfiguration configuration)
         {
@@ -39,7 +38,7 @@ namespace Bot
             this.port = configuration.Port;
             this.channel = configuration.Channel;
 
-            this.commandPrefix = string.Format("!{0}", this.nickName.ToLower());
+            this.commandPrefix = string.Format("{0}", this.nickName.ToLower());
 
             this.client = new IrcClient();
         }
@@ -50,37 +49,46 @@ namespace Bot
 
             using (this.client)
             {
-                this.client.Connect(
-                    this.hostName,
-                    this.port,
-                    false,
-                    new IrcUserRegistrationInfo
-                    {
-                        NickName = this.nickName,
-                        UserName = this.userName,
-                        RealName = this.realName
-                    }
-                );
-
-                while (!this.Connected)
-                {
-                    Thread.Sleep(200);
-                }
-
-                Thread.Sleep(1000);
-
-                await Task.Run(() =>
-                {
-                    StartTasks();
-                    while (this.Connected || this.tasks.Any(t => t.IsRunning))
-                    {
-                        Thread.Sleep(250);
-                    };
-                });
+                Connect();
+                WaitForRegistration();
+                await Start();
             }
         }
 
-        public bool Connected
+        private async Task Start()
+        {
+            await Task.Run(() => {
+                StartTasks();
+                while (this.IsConnected || this.tasks.Any(t => t.IsRunning))
+                {
+                    Thread.Sleep(250);
+                }
+            });
+        }
+
+        private void WaitForRegistration()
+        {
+            while (!this.IsConnected && !this.isRegistered)
+            {
+                Thread.Sleep(200);
+            }
+        }
+
+        private void Connect()
+        {
+            this.client.Connect(
+                this.hostName,
+                this.port,
+                false,
+                new IrcUserRegistrationInfo {
+                    NickName = this.nickName,
+                    UserName = this.userName,
+                    RealName = this.realName
+                }
+            );
+        }
+
+        public bool IsConnected
         {
             get { return this.client.IsConnected; }
         }
@@ -126,9 +134,14 @@ namespace Bot
             var channel = sender as IrcChannel;
             var parts = e.Text.Split(' ');
 
-            if (parts.Length > 0 && parts[0].ToLower().Equals(this.commandPrefix)) {
+            if (IsValidCommand(parts)) {
                 ProcessCommand(parts, channel, e.Source);
             }
+        }
+
+        private bool IsValidCommand(string[] commandParts)
+        {
+            return (commandParts.Length > 0 && commandParts[0].ToLower().StartsWith(this.commandPrefix));
         }
 
         private void ProcessCommand(string[] commandParts, IIrcMessageTarget target, IIrcMessageSource source)
@@ -145,13 +158,12 @@ namespace Bot
             processor.Process(command);
         }
 
-
         private void SubscribeToRegisteredClientEvents(IrcLocalUser user)
         {
             user.JoinedChannel += OnJoinedChannel;
         }
 
-        void OnJoinedChannel(object sender, IrcChannelEventArgs e)
+        private void OnJoinedChannel(object sender, IrcChannelEventArgs e)
         {
             SubscribeToChannelEvents(e.Channel);
         }
@@ -159,8 +171,12 @@ namespace Bot
         private void OnRegistered(object sender, EventArgs e)
         {
             var client = sender as IrcClient;
-            SubscribeToRegisteredClientEvents(client.LocalUser);
-            JoinChannels();
+            if (client != null)
+            {
+                this.isRegistered = true;
+                SubscribeToRegisteredClientEvents(client.LocalUser);
+                JoinChannels();
+            }
         }
 
         private void JoinChannels()
