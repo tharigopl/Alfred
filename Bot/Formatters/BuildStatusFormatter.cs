@@ -15,12 +15,20 @@ namespace Bot.Formatters
 
             var title = build.Title.Text;
             var summary = build.Summary.Text;
-            var publishDate = build.PublishDate.ToString("T");
+            var publishDate = build.PublishDate.ToLocalTime().ToString("T");
 
             var startPosition = summary.IndexOf("<strong>") + "<strong>".Length;
             var testSummary = summary.Substring(
                     startPosition,
                     summary.IndexOf("</strong>") - startPosition
+            );
+
+            var numberOfTestsText = testSummary.Split(' ')[2];
+            var numberOfTests = int.Parse(numberOfTestsText.Substring(0, numberOfTestsText.Length - 1));
+            var testsLeftToParty = 1337 - numberOfTests;
+            testSummary += string.Format(
+                ", {0} left to partay!", 
+                testsLeftToParty
             );
 
             messages.Add(string.Format("{0} @ {1}", title, publishDate));
