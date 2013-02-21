@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 
 namespace Bot.Commands
 {
-    public class EchoCommand : IIrcCommandProcessor
+    public class EchoCommand : IrcCommandProcessor
     {
-        public void Process(IrcCommand command)
+        public override void Process(IrcCommand command)
         {
-            var message = string.Join(" ", command.Parameters);
-            command.Client.LocalUser.SendMessage(command.Target, message);
+            base.Process(command);
+
+            SendMessage(
+                string.Join(" ", command.Parameters)
+            );
         }
     }
 }
