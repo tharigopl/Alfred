@@ -58,7 +58,6 @@ namespace Bot
         private async Task Start()
         {
             await Task.Run(() => {
-                StartTasks();
                 while (this.IsConnected || this.tasks.Any(t => t.IsRunning))
                 {
                     Thread.Sleep(250);
@@ -165,6 +164,7 @@ namespace Bot
 
         private void OnJoinedChannel(object sender, IrcChannelEventArgs e)
         {
+            StartTasks();
             SubscribeToChannelEvents(e.Channel);
         }
 
