@@ -12,33 +12,27 @@ namespace Bot
 {
     public class IrcBot
     {
-        private readonly string nickName;
-        private readonly string userName;
-        private readonly string realName;
+        public IrcBotConfiguration Configuration { get; private set; }
+
         private readonly string commandPrefix;
-        private readonly string channel;
-
-        private readonly string hostName;
-        private readonly int port;
-
         private readonly List<IIrcTask> tasks;
 
         private readonly IrcClient client;
         private bool isRegistered;
 
+        private IrcCommandProcessorFactory commandProcessorFactory;
+
         public IrcBot(IrcBotConfiguration configuration)
         {
             this.tasks = new List<IIrcTask>();
+            this.commandProcessorFactory = new IrcCommandProcessorFactory();
 
-            this.nickName = configuration.NickName;
-            this.userName = configuration.UserName ?? this.nickName;
-            this.realName = configuration.RealName ?? this.nickName;
+            configuration.UserName = configuration.UserName ?? configuration.NickName;
+            configuration.RealName = configuration.RealName?? configuration.NickName;
 
-            this.hostName = configuration.HostName;
-            this.port = configuration.Port;
-            this.channel = configuration.Channel;
+            this.Configuration = configuration;
 
-            this.commandPrefix = string.Format("{0}", this.nickName.ToLower());
+            this.commandPrefix = string.Format("{0}", this.Configuration.NickName.ToLower());
 
             this.client = new IrcClient();
         }
@@ -76,13 +70,13 @@ namespace Bot
         private void Connect()
         {
             this.client.Connect(
-                this.hostName,
-                this.port,
+                this.Configuration.HostName,
+                this.Configuration.Port,
                 false,
                 new IrcUserRegistrationInfo {
-                    NickName = this.nickName,
-                    UserName = this.userName,
-                    RealName = this.realName
+                    NickName = this.Configuration.NickName,
+                    UserName = this.Configuration.UserName,
+                    RealName = this.Configuration.RealName
                 }
             );
         }
@@ -146,14 +140,14 @@ namespace Bot
         private void ProcessCommand(string[] commandParts, IIrcMessageTarget target, IIrcMessageSource source)
         {
             var command = new IrcCommand(
+                this,
                 this.client,
                 commandParts,
                 target,
                 source
             );
 
-            var factory = new IrcCommandProcessorFactory();
-            var processor = factory.GetByCommand(command);
+            var processor = this.commandProcessorFactory.GetByCommand(command);
             processor.Process(command);
         }
 
@@ -181,7 +175,7 @@ namespace Bot
 
         private void JoinChannels()
         {
-            this.client.Channels.Join(this.channel);
+            this.client.Channels.Join(this.Configuration.Channel);
         }
 
         public void AddTask(IrcTask task)

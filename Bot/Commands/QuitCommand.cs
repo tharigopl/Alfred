@@ -4,17 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Bot.Commands
 {
-    public class QuitCommand : IIrcCommandProcessor
+    [IrcCommand("quit")]
+    public class QuitCommand : IrcCommandProcessor
     {
-        public void Process(IrcCommand command)
+        public override void Process(IrcCommand command)
         {
-            command.Client.LocalUser.SendMessage(
-                command.Target,
+            base.Process(command);
+
+            SendMessage(
                 string.Format("Ok {0}, I'm outta here!", command.Source.Name)
             );
+
+            Thread.Sleep(250);
 
             command.Client.Quit(
                 string.Format(
@@ -22,6 +27,8 @@ namespace Bot.Commands
                     command.Source.Name
                 )
             );
+
+            Thread.Sleep(250);
 
             command.Client.Disconnect();
         }

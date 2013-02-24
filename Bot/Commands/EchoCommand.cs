@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bot.Commands
 {
+    [IrcCommand("echo")]
     public class EchoCommand : IrcCommandProcessor
     {
         public override void Process(IrcCommand command)

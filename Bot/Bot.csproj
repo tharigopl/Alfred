@@ -46,8 +46,11 @@
   <ItemGroup>
     <Compile Include="Commands\BuildStatusCommand.cs" />
     <Compile Include="Commands\EchoCommand.cs" />
+    <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\IIrcCommandProcessor.cs" />
+    <Compile Include="Commands\IrcCommandAttribute.cs" />
     <Compile Include="Commands\IrcCommandProcessor.cs" />
+    <Compile Include="Commands\IrcCommandProcessorList.cs" />
     <Compile Include="Formatters\BuildStatusFormatter.cs" />
     <Compile Include="Formatters\IFormatter.cs" />
     <Compile Include="IrcBot.cs" />

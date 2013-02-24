@@ -10,6 +10,7 @@ using Bot.Formatters;
 
 namespace Bot.Commands
 {
+    [IrcCommand("status")]
     public class BuildStatusCommand : IrcCommandProcessor
     {
         private readonly IIrcMessageFormatter<SyndicationItem> formatter;

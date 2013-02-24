@@ -9,14 +9,22 @@ namespace Bot.Commands
 {
     public class IrcCommand
     {
+        public IrcBot Bot { get; private set; }
         public IrcClient Client { get; private set; }
         public string Name { get; private set; }
         public string[] Parameters { get; private set; }
         public IIrcMessageTarget Target { get; private set; }
         public IIrcMessageSource Source { get; private set; }
 
-        public IrcCommand(IrcClient client, string[] parameters, IIrcMessageTarget target, IIrcMessageSource source)
+        public IrcCommand(
+            IrcBot bot, 
+            IrcClient client, 
+            string[] parameters, 
+            IIrcMessageTarget target, 
+            IIrcMessageSource source
+        )
         {
+            this.Bot = bot;
             this.Client = client;
             this.Target = target;
             this.Source = source;

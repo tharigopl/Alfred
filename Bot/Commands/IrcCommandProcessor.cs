@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using IrcDotNet;
 
 namespace Bot.Commands
 {
@@ -9,12 +10,14 @@ namespace Bot.Commands
     {
         protected IrcCommand command;
 
+        public IrcCommandProcessor() { }
+
         public virtual void Process(IrcCommand command)
         {
             this.command = command;
         }
 
-        public void SendMessage(string message)
+        protected void SendMessage(string message)
         {
             if (this.command == null) return;
 
@@ -23,5 +26,17 @@ namespace Bot.Commands
                 message
             );
         }
+
+        protected void SendNotice(string message)
+        {
+            if (this.command == null) return;
+
+            this.command.Client.LocalUser.SendNotice(
+                new string[1] { this.command.Source.Name },
+                message
+            );
+        }
+
+
     }
 }
