@@ -15,7 +15,11 @@ namespace Bot.Commands
             base.Process(command);
 
             var list = new IrcCommandProcessorList();
-            var commands = list.Processors.Select(p => p.Key).ToArray();
+            var commands = list.Processors
+                .Select(p => p.Key)
+                .OrderBy(p => p)
+                .ToArray();
+
             var commandList = string.Join(", ", commands);
 
             SendNotice(
