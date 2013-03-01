@@ -61,11 +61,9 @@ namespace Bot.Tasks
                 // output this somewhere
                 // HACK: console for now
                 Console.WriteLine(
-                    string.Format(
-                        "Exception in {0}: {1}",
-                        this.Name,
-                        ex.Message
-                    )
+                    "Exception in {0}: {1}",
+                    this.Name,
+                    ex.Message
                 );
             }
         }
