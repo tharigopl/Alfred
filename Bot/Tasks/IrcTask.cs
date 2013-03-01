@@ -30,24 +30,44 @@ namespace Bot.Tasks
             {
                 return (
                     this.Task != null && 
-                    this.Task.IsCanceled && 
-                    this.Task.IsCompleted && 
-                    this.Task.IsFaulted
+                    !this.Task.IsCanceled && 
+                    !this.Task.IsCompleted && 
+                    !this.Task.IsFaulted
                 );
-            }
-        }
-
-        public void Start()
-        {
-            if (action != null)
-            {
-                Task = Task.Run(action, cancellationToken);
             }
         }
 
         public void Stop()
         {
             this.tokenSource.Cancel();
+        }
+
+        public void Start()
+        {
+            if (action != null)
+            {
+                Task = Task.Run(() => TryAction(), cancellationToken);
+            }
+        }
+
+        private void TryAction()
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                // output this somewhere
+                // HACK: console for now
+                Console.WriteLine(
+                    string.Format(
+                        "Exception in {0}: {1}",
+                        this.Name,
+                        ex.Message
+                    )
+                );
+            }
         }
 
         protected void SendMessages(IEnumerable<string> messages)
