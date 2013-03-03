@@ -49,11 +49,15 @@ namespace Bot.Commands
             );
         }
 
-        protected bool HandleNoParameters(string message, IIrcCommandProcessor helpCommand)
+        protected bool HandleNoParameters(string prompt, IIrcCommandProcessor helpCommand, bool publicMessage = true)
         {
             if (!HasParameters)
             {
-                SendMessage(message);
+                if (publicMessage)
+                    SendMessage(prompt);
+                else
+                    SendNotice(prompt);
+
                 Thread.Sleep(1000);
                 ShowHelp(helpCommand);
             }

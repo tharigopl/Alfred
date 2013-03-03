@@ -81,6 +81,13 @@
     <Compile Include="Commands\IrcCommandList.cs" />
     <Compile Include="Commands\IrcCommandProcessor.cs" />
     <Compile Include="Commands\IrcHelpCommandProcessor.cs" />
+    <Compile Include="Commands\User\UserRegisterCommand.cs" />
+    <Compile Include="Commands\User\UserRegisterHelpCommand.cs" />
+    <Compile Include="Data\Database.cs" />
+    <Compile Include="Data\User.cs" />
+    <Compile Include="Data\ModelBase.cs" />
+    <Compile Include="Data\Users.cs" />
+    <Compile Include="Data\UsersRepository.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Formatters\BuildStatusFormatter.cs" />
     <Compile Include="Formatters\IFormatter.cs" />
