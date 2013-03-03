@@ -12,7 +12,10 @@ namespace BotConsoleHost
             var config = CreateConfiguration();
             var bot = new IrcBot(config);
             var uriString = ConfigurationManager.AppSettings["feed"];
-            //bot.AddTask(new IrcTeamCityBuildStatusTask(new Uri(uriString)));
+
+            if (!string.IsNullOrWhiteSpace(uriString))
+                bot.AddTask(new IrcTeamCityBuildStatusTask(new Uri(uriString)));
+
             bot.Run().Wait();
         }
 
