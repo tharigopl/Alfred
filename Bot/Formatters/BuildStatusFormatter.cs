@@ -46,8 +46,7 @@ namespace Bot.Formatters
                 summary.IndexOf("</strong>") - startPosition
             );
 
-            var numberOfTestsText = testSummary.Split(' ')[2];
-            var numberOfTests = int.Parse(numberOfTestsText.Substring(0, numberOfTestsText.Length - 1));
+            var numberOfTests = GetNumberOfTests(testSummary);
             var testsLeftToParty = 1337 - numberOfTests;
             testSummary += string.Format(
                 ", {0} left to partay!",
@@ -55,6 +54,16 @@ namespace Bot.Formatters
                 );
 
             return testSummary;
+        }
+
+        private static int GetNumberOfTests(string testSummary)
+        {
+            var startingText = "passed: ";
+            var startPosition = testSummary.IndexOf(startingText) + startingText.Length;
+            var endPosition = testSummary.IndexOf(',', startPosition);
+            var numberOfTestsText = testSummary.Substring(startPosition, endPosition - startPosition);
+            var numberOfTests = int.Parse(numberOfTestsText);
+            return numberOfTests;
         }
 
         private string GetChangesUrl()
