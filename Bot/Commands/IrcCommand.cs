@@ -32,28 +32,30 @@ namespace Bot.Commands
             ParseParameters(parameters);
         }
 
-        private void ParseParameters(string[] parameters)
+        public void Shift()
         {
-            if (parameters.Length > 0)
-                this.Name = parameters[1].ToLower();
-
-            var commandParameters = TrimParameters(parameters);
-            this.Parameters = commandParameters;
+            this.Name = Parameters[0].ToLower();
+            TrimParameters(1);
         }
 
-        private string[] TrimParameters(string[] parameters)
+        private void ParseParameters(string[] parameters)
         {
-            var parametersToTrim = 2;
+            if (parameters.Length > 1)
+                this.Name = parameters[1].ToLower();
 
-            if (parameters.Length > parametersToTrim)
+            this.Parameters = parameters;
+            TrimParameters(2);
+        }
+
+        private void TrimParameters(int parametersToTrim)
+        {
+            if (Parameters.Length >= parametersToTrim)
             {
-                var newLength = parameters.Length - parametersToTrim;
-                var commandParameters = new string[parameters.Length - 2];
-                Array.Copy(parameters, 2, commandParameters, 0, parameters.Length - 2);
-                return commandParameters;
+                var newLength = Parameters.Length - parametersToTrim;
+                var commandParameters = new string[Parameters.Length - parametersToTrim];
+                Array.Copy(Parameters, parametersToTrim, commandParameters, 0, Parameters.Length - parametersToTrim);
+                Parameters = commandParameters;
             }
-
-            return new string[0];
         }
 
     }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.ServiceModel.Syndication;
+using Bot.Commands.Attributes;
 using Bot.Formatters;
 
 namespace Bot.Commands

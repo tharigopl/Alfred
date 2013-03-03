@@ -9,25 +9,25 @@ namespace Bot.Commands
 {
     public class IrcCommandProcessorFactory
     {
-        private readonly Dictionary<string, Type> processors;
+        private readonly Dictionary<string, Type> commandMap;
 
-        public IrcCommandProcessorFactory()
+        public IrcCommandProcessorFactory(Dictionary<string, Type> processors)
         {
-            var list = new IrcCommandProcessorList();
-            this.processors = list.Processors;
+            this.commandMap = processors;
         }
 
-        public IIrcCommandProcessor GetByCommand(IrcCommand command)
+        public IIrcCommandProcessor CreateByCommand(IrcCommand command)
         {
-            if (this.processors.ContainsKey(command.Name))
+            if (!string.IsNullOrEmpty(command.Name) && this.commandMap.ContainsKey(command.Name))
             {
-                var type = this.processors[command.Name];
+                var type = this.commandMap[command.Name];
                 var instance = Activator.CreateInstance(type);
                 return (IIrcCommandProcessor)instance;
             }
 
             return new UnsupportedCommand();
         }
+
 
     }
 }

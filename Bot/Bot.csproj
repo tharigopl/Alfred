@@ -30,11 +30,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK, Version=1.5.15.0, Culture=neutral, PublicKeyToken=9f476d3089b52be3, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\AWSSDK.1.5.15.0\lib\AWSSDK.dll</HintPath>
+    </Reference>
     <Reference Include="IrcDotNet">
       <HintPath>..\packages\IrcDotNet.0.4.1\lib\net40\IrcDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
@@ -44,15 +49,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Attributes\AwsCommandAttribute.cs" />
+    <Compile Include="Commands\Attributes\AwsElbCommandAttribute.cs" />
+    <Compile Include="Commands\Attributes\AwsElbStatusCommandAttribute.cs" />
+    <Compile Include="Commands\AWS\AwsCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbHelpCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbListCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbStatusCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbStatusHelpCommand.cs" />
+    <Compile Include="Commands\AWS\AwsHelpCommand.cs" />
     <Compile Include="Commands\BuildStatusCommand.cs" />
     <Compile Include="Commands\EchoCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\IIrcCommandProcessor.cs" />
-    <Compile Include="Commands\IrcCommandAttribute.cs" />
+    <Compile Include="Commands\Attributes\IrcCommandAttribute.cs" />
+    <Compile Include="Commands\IrcCommandList.cs" />
     <Compile Include="Commands\IrcCommandProcessor.cs" />
-    <Compile Include="Commands\IrcCommandProcessorList.cs" />
+    <Compile Include="Commands\IrcHelpCommandProcessor.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Formatters\BuildStatusFormatter.cs" />
     <Compile Include="Formatters\IFormatter.cs" />
+    <Compile Include="Infrastructure\AWS\AwsClient.cs" />
+    <Compile Include="Infrastructure\AWS\EC2.cs" />
+    <Compile Include="Infrastructure\AWS\ELB.cs" />
     <Compile Include="IrcBot.cs" />
     <Compile Include="IrcBotConfiguration.cs" />
     <Compile Include="Commands\IrcCommand.cs" />
@@ -68,7 +88,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

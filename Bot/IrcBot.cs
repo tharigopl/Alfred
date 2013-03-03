@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bot.Commands;
+using Bot.Commands.Attributes;
+using Bot.Extensions;
 using Bot.Tasks;
 
 namespace Bot
@@ -20,12 +22,14 @@ namespace Bot
         private readonly IrcClient client;
         private bool isRegistered;
 
-        private IrcCommandProcessorFactory commandProcessorFactory;
+        private static IrcCommandProcessorFactory commandProcessorFactory = 
+            new IrcCommandProcessorFactory(
+                typeof(IrcCommandProcessor).SubclassesWithAttribute<IrcCommandAttribute>()
+            );
 
         public IrcBot(IrcBotConfiguration configuration)
         {
             this.tasks = new List<IIrcTask>();
-            this.commandProcessorFactory = new IrcCommandProcessorFactory();
 
             configuration.UserName = configuration.UserName ?? configuration.NickName;
             configuration.RealName = configuration.RealName?? configuration.NickName;
@@ -147,8 +151,41 @@ namespace Bot
                 source
             );
 
-            var processor = this.commandProcessorFactory.GetByCommand(command);
-            processor.Process(command);
+            Task.Run(() =>
+            {
+                try
+                {
+                    var processor = commandProcessorFactory.CreateByCommand(command);
+                    processor.Process(command);
+                }
+                catch (Exception ex)
+                {
+                    HandleCommandException(command, ex);
+                }
+            });
+        }
+
+        private void HandleCommandException(IrcCommand command, Exception ex)
+        {
+            var message = 
+                string.Format(
+                    "{0}, I ran into a bit of a problem with that last request: {1}",
+                    command.Source.Name,
+                    ex.Message
+                );
+
+            if (ex.InnerException != null) {
+                message = string.Format(
+                    "{0} {1}",
+                    message,
+                    ex.InnerException.Message
+                );
+            }
+
+            this.client.LocalUser.SendMessage(
+                command.Target,
+                message.Replace(Environment.NewLine, " ")
+            );
         }
 
         private void SubscribeToRegisteredClientEvents(IrcLocalUser user)
