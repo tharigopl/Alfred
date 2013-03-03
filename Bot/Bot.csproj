@@ -74,6 +74,7 @@
     <Compile Include="Commands\AWS\AwsElbStatusHelpCommand.cs" />
     <Compile Include="Commands\AWS\AwsHelpCommand.cs" />
     <Compile Include="Commands\BuildStatusCommand.cs" />
+    <Compile Include="Commands\DiceCommand.cs" />
     <Compile Include="Commands\EchoCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\IIrcCommandProcessor.cs" />
