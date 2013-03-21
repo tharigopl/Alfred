@@ -26,35 +26,56 @@ namespace Bot.Commands.User
                 return;
             }
 
-            var user = CreateUser();
-            SendNotices(user);
+            CreateUser();
         }
 
-        private Data.User CreateUser()
+        private void CreateUser()
         {
-            var user = ParseParameters();
-            var repository = new UsersRepository();
-            repository.Save(user);
-            return user;
+            Data.User user = null;
+            if (TryCreateUser(out user))
+            {
+                SendRegisteredMessages(user);
+            }
+            else
+            {
+                SendErrorMessages();
+            }
         }
 
-        private void SendNotices(Data.User user)
+        private bool TryCreateUser(out Data.User user)
+        {
+            user = ParseParameters();
+            var repository = new UsersRepository();
+            return repository.Save(user);
+        }
+
+        private void SendRegisteredMessages(Data.User user)
+        {
+            SendPrivateMessages(
+                new string[] {
+                    string.Format(
+                        "{0}, you are now registered with the username {1} and the password {2}.",
+                        command.Source.Name,
+                        user.UserName,
+                        user.Password
+                    ),
+                    string.Format(
+                        "If I need to e-mail you, I will use the address you gave me: {0}",
+                        user.Email
+                    ),
+                    "To login and receive your candy, use the command: login <username> <password>"
+                }
+            );
+        }
+
+        private void SendErrorMessages()
         {
             SendPrivateMessage(
                 string.Format(
-                    "{0}, you are now registered with the username {1} and the password {2}.",
-                    command.Source.Name,
-                    user.UserName,
-                    user.Password
+                    "I was unable to create a user with the username {0} because it's already registered.",
+                    command.Parameters[0]
                 )
             );
-            SendNotice(
-                string.Format(
-                    "If I need to e-mail you, I will use the address you gave me: {0}",
-                    user.Email
-                )
-            );
-            SendNotice("To login and receive your candy, use the command: login <username> <password>");
         }
 
         private Data.User ParseParameters()
@@ -76,27 +97,27 @@ namespace Bot.Commands.User
             var username = command.Parameters[0];
             if (username.Length < 3)
             {
-                SendNotice("username must be at least 3 characters.");
+                SendPrivateMessage("username must be at least 3 characters.");
                 return false;
             }
 
             var password = command.Parameters[1];
             if (password.Length < 5)
             {
-                SendNotice("password must be at least 5 characters.");
+                SendPrivateMessage("password must be at least 5 characters.");
                 return false;
             }
 
             var email = command.Parameters[2];
             if (!EmailIsValid(email)) {
-                SendNotice("invalid e-mail address.");
+                SendPrivateMessage("invalid e-mail address.");
                 return false;
             }
 
             return true;
         }
 
-        static Regex ValidEmailRegex = CreateValidEmailRegex();
+        static readonly Regex ValidEmailRegex = CreateValidEmailRegex();
 
         /// <summary>
         /// Taken from http://haacked.com/archive/2007/08/21/i-knew-how-to-validate-an-email-address-until-i.aspx
@@ -104,9 +125,9 @@ namespace Bot.Commands.User
         /// <returns></returns>
         private static Regex CreateValidEmailRegex()
         {
-            string validEmailPattern = @"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|"
-                + @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)"
-                + @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$";
+            const string validEmailPattern = @"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|"
+                                             + @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)"
+                                             + @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$";
 
             return new Regex(validEmailPattern, RegexOptions.IgnoreCase);
         }
