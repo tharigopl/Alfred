@@ -9,7 +9,7 @@ using Bot.Data;
 
 namespace Bot.Commands.User
 {
-    [IrcCommand("register")]
+    [UserCommand("register")]
     public class UserRegisterCommand : IrcCommandProcessor
     {
         public override void Process(IrcCommand command)

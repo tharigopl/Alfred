@@ -67,6 +67,7 @@
     <Compile Include="Commands\Attributes\AwsElbCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\AwsElbStatusCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\AwsElbRepairCommandAttribute.cs" />
+    <Compile Include="Commands\Attributes\UserCommandAttribute.cs" />
     <Compile Include="Commands\AWS\AwsCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbHelpCommand.cs" />
@@ -90,6 +91,9 @@
     <Compile Include="Commands\IrcHelpCommandProcessor.cs" />
     <Compile Include="Commands\IrcMessageCommand.cs" />
     <Compile Include="Commands\SnackCommand.cs" />
+    <Compile Include="Commands\User\UserCommand.cs" />
+    <Compile Include="Commands\User\UserHelpCommand.cs" />
+    <Compile Include="Commands\User\UserLoginCommand.cs" />
     <Compile Include="Commands\User\UserRegisterCommand.cs" />
     <Compile Include="Commands\User\UserRegisterHelpCommand.cs" />
     <Compile Include="Data\Database.cs" />
