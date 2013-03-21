@@ -18,11 +18,29 @@ namespace Bot.Infrastructure.AWS
             this.client = EC2Client();
         }
 
-        public List<InstanceStatus> InstanceStatus(List<string> instanceIds)
+        public List<InstanceStatus> InstanceStatus(IEnumerable<string> instanceIds)
         {
             var request = new DescribeInstanceStatusRequest().WithInstanceId(instanceIds.ToArray());
             var response = this.client.DescribeInstanceStatus(request);
             return response.DescribeInstanceStatusResult.InstanceStatus;
+        }
+
+        public List<RunningInstance> InstanceDescriptions(IEnumerable<string> instanceIds)
+        {
+            var request = new DescribeInstancesRequest().WithInstanceId(instanceIds.ToArray());
+            var response = this.client.DescribeInstances(request);
+
+            return response
+                .DescribeInstancesResult
+                .Reservation
+                .SelectMany(reservation => reservation.RunningInstance)
+                .ToList();
+        }
+
+        public void RebootInstances(IEnumerable<string> instanceIds)
+        {
+            var request = new RebootInstancesRequest().WithInstanceId(instanceIds.ToArray());
+            var response = this.client.RebootInstances(request);
         }
 
         private AmazonEC2 EC2Client()
