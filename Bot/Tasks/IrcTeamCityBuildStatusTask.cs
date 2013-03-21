@@ -63,12 +63,24 @@ namespace Bot.Tasks
 
         private SyndicationItem GetMostRecentBuild()
         {
-            var reader = XmlReader.Create(this.feedUri.ToString());
-            var feed = SyndicationFeed.Load(reader);
+            SyndicationItem item = null;
 
-            if (feed == null) return null;
+            try
+            {
+                var reader = XmlReader.Create(this.feedUri.ToString());
+                var feed = SyndicationFeed.Load(reader);
 
-            return feed.Items.First();
+                if (feed == null) return null;
+
+                item = feed.Items.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                // HACK: console for now
+                Console.WriteLine(ex);
+            }
+
+            return item;
         }
 
     }
