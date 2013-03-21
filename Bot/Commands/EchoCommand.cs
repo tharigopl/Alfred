@@ -15,7 +15,7 @@ namespace Bot.Commands
         {
             base.Process(command);
 
-            SendMessage(
+            SendChannelMessage(
                 string.Join(" ", command.Parameters)
             );
         }

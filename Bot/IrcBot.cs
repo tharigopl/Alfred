@@ -131,26 +131,26 @@ namespace Bot
             var channel = sender as IrcChannel;
             var parts = e.Text.Split(' ');
 
-            if (IsValidCommand(parts)) {
-                ProcessCommand(parts, channel, e.Source);
+            if (IsValidChannelCommand(parts)) {
+                var command = new IrcCommand(
+                    this,
+                    this.client,
+                    parts,
+                    channel,
+                    e.Source
+                );
+
+                ProcessCommand(command);
             }
         }
 
-        private bool IsValidCommand(string[] commandParts)
+        private bool IsValidChannelCommand(string[] commandParts)
         {
             return (commandParts.Length > 0 && commandParts[0].ToLower().StartsWith(this.commandPrefix));
         }
 
-        private void ProcessCommand(string[] commandParts, IIrcMessageTarget target, IIrcMessageSource source)
+        private void ProcessCommand(IrcCommand command)
         {
-            var command = new IrcCommand(
-                this,
-                this.client,
-                commandParts,
-                target,
-                source
-            );
-
             Task.Run(() =>
             {
                 try
@@ -191,6 +191,25 @@ namespace Bot
         private void SubscribeToRegisteredClientEvents(IrcLocalUser user)
         {
             user.JoinedChannel += OnJoinedChannel;
+            user.MessageReceived += OnMessageReceived;
+        }
+
+        private void OnMessageReceived(object sender, IrcMessageEventArgs e)
+        {
+            var parts = e.Text.Split(' ');
+
+            if (!e.Source.Name.Equals(this.Configuration.NickName, StringComparison.OrdinalIgnoreCase))
+            {
+                var command = new IrcMessageCommand(
+                    this,
+                    this.client,
+                    parts,
+                    e.Source as IIrcMessageTarget,
+                    e.Source
+                );
+
+                ProcessCommand(command);
+            }
         }
 
         private void OnJoinedChannel(object sender, IrcChannelEventArgs e)
@@ -202,12 +221,11 @@ namespace Bot
         private void OnRegistered(object sender, EventArgs e)
         {
             var client = sender as IrcClient;
-            if (client != null)
-            {
-                this.isRegistered = true;
-                SubscribeToRegisteredClientEvents(client.LocalUser);
-                JoinChannels();
-            }
+            if (client == null) return;
+
+            this.isRegistered = true;
+            SubscribeToRegisteredClientEvents(client.LocalUser);
+            JoinChannels();
         }
 
         private void JoinChannels()

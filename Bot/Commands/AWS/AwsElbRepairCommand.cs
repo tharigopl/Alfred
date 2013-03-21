@@ -31,9 +31,9 @@ namespace Bot.Commands.AWS
             if (HandleNoParameters(message, new AwsElbRepairHelpCommand()))
                 return;
 
-            SendMessage("checking status...");
+            SendChannelMessage("checking status...");
             this.states = GetInstanceStates();
-            SendMessage(GetInstanceStatusMessage());
+            SendChannelMessage(GetInstanceStatusMessage());
 
             var badInstances = GetBadInstances();
             if (badInstances.Count > 0)
@@ -42,7 +42,7 @@ namespace Bot.Commands.AWS
             }
             else
             {
-                SendMessage(
+                SendChannelMessage(
                     string.Format(
                         "no out of service instances detected, {0}. celebrate!",
                         this.command.Source.Name
@@ -55,7 +55,7 @@ namespace Bot.Commands.AWS
         private void RebootInstances(List<string> instances)
         {
             var instancesMessage = string.Join(", ", instances.Select(i => i).ToArray());
-            SendMessage(
+            SendChannelMessage(
                 string.Format(
                     "out of service instances detected. rebooting these now: {0}",
                     instancesMessage
@@ -64,7 +64,7 @@ namespace Bot.Commands.AWS
 
             this.ec2.RebootInstances(instances);
 
-            SendMessage(
+            SendChannelMessage(
                 string.Format(
                     "finished rebooting: {0}",
                     instancesMessage

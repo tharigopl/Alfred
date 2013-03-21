@@ -12,7 +12,7 @@ namespace Bot.Commands.User
         {
             base.Process(command);
 
-            SendNotice("usage: register <username> <password> <email>");
+            SendPrivateMessage("usage: register <username> <password> <email>");
         }
 
     }

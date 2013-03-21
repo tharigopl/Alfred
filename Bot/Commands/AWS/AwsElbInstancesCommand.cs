@@ -26,7 +26,7 @@ namespace Bot.Commands.AWS
 
             foreach (var description in descriptions)
             {
-                SendNotice(
+                SendPrivateMessage(
                     string.Format(
                         @"id: {0} / ip: {1} / state: {2} / type: {3} / ami: {4} / dns: {5}",
                         description.InstanceId,

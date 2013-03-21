@@ -40,7 +40,7 @@ namespace Bot.Commands.User
 
         private void SendNotices(Data.User user)
         {
-            SendNotice(
+            SendPrivateMessage(
                 string.Format(
                     "{0}, you are now registered with the username {1} and the password {2}.",
                     command.Source.Name,

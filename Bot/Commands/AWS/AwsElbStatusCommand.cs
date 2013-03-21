@@ -27,8 +27,8 @@ namespace Bot.Commands.AWS
             if (HandleNoParameters(message, new AwsElbStatusHelpCommand()))
                 return;
 
-            SendMessage("checking status...");
-            SendMessage(GetInstanceStatusMessage());
+            SendChannelMessage("checking status...");
+            SendChannelMessage(GetInstanceStatusMessage());
         }
 
         private string GetInstanceStatusMessage()

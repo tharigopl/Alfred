@@ -19,7 +19,7 @@ namespace Bot.Commands
 
         protected bool HasParameters { get { return this.command.Parameters.Length != 0; } }
 
-        protected void SendMessage(string message)
+        protected void SendChannelMessage(string message)
         {
             if (this.command == null) return;
             if (string.IsNullOrEmpty(message)) return;
@@ -30,12 +30,12 @@ namespace Bot.Commands
             );
         }
 
-        protected void SendMessages(List<string> messages)
+        protected void SendChannelMessages(IEnumerable<string> messages)
         {
             if (this.command == null) return;
 
             foreach (var message in messages)
-                SendMessage(message);
+                SendChannelMessage(message);
         }
 
         protected void SendNotice(string message)
@@ -43,9 +43,35 @@ namespace Bot.Commands
             if (this.command == null) return;
 
             this.command.Client.LocalUser.SendNotice(
-                new string[1] { this.command.Source.Name },
+                this.command.Source as IIrcMessageTarget,
                 message
             );
+        }
+
+        protected void SendNotices(IEnumerable<string> messages)
+        {
+            if (this.command == null) return;
+
+            foreach (var message in messages)
+                SendNotice(message);
+        }
+
+        protected void SendPrivateMessage(string message)
+        {
+            if (this.command == null) return;
+
+            this.command.Client.LocalUser.SendMessage(
+                this.command.Source as IIrcMessageTarget,
+                message
+            );
+        }
+
+        protected void SendPrivateMessages(IEnumerable<string> messages)
+        {
+            if (this.command == null) return;
+
+            foreach (var message in messages)
+                SendPrivateMessage(message);
         }
 
         protected bool HandleNoParameters(string prompt, IIrcCommandProcessor helpCommand, bool publicMessage = true)
@@ -53,7 +79,7 @@ namespace Bot.Commands
             if (!HasParameters)
             {
                 if (publicMessage)
-                    SendMessage(prompt);
+                    SendChannelMessage(prompt);
                 else
                     SendNotice(prompt);
 

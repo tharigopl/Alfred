@@ -88,6 +88,7 @@
     <Compile Include="Commands\IrcCommandProcessor.cs" />
     <Compile Include="Commands\IrcExtensionMethods.cs" />
     <Compile Include="Commands\IrcHelpCommandProcessor.cs" />
+    <Compile Include="Commands\IrcMessageCommand.cs" />
     <Compile Include="Commands\SnackCommand.cs" />
     <Compile Include="Commands\User\UserRegisterCommand.cs" />
     <Compile Include="Commands\User\UserRegisterHelpCommand.cs" />

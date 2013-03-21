@@ -23,10 +23,10 @@ namespace Bot.Commands.AWS
         {
             base.Process(command);
 
-            SendMessage("retrieving list of load balancers...");
+            SendChannelMessage("retrieving list of load balancers...");
             var descriptions = this.elb.List(command.Parameters.FirstOrDefault());
-            SendMessages(GetMessages(descriptions));
-            SendMessage("use \"aws elb status <elb name>\" to see more information");
+            SendChannelMessages(GetMessages(descriptions));
+            SendChannelMessage("use \"aws elb status <elb name>\" to see more information");
         }
 
         private List<string> GetMessages(List<LoadBalancerDescription> descriptions)

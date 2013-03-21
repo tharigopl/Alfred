@@ -13,7 +13,7 @@ namespace Bot.Commands.AWS
         {
             base.Process(command);
 
-            SendMessage(
+            SendChannelMessage(
                 "It's easy! Just type this: aws elb status <load balancer name>"
             );
         }

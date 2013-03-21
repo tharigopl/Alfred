@@ -27,7 +27,7 @@ namespace Bot.Commands
 
             var statusMessages = GetBuildStatus();
             foreach (var message in statusMessages)
-                SendMessage(message);
+                SendChannelMessage(message);
         }
 
         private IEnumerable<string> GetBuildStatus()
