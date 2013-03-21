@@ -35,11 +35,18 @@ namespace Bot.Infrastructure.AWS
                 throw new ArgumentNullException("loadBalancerName");
 
             return List(loadBalancerName)
-           //         .Where(d => d.LoadBalancerName.ToLower() == loadBalancerName.ToLower())
                     .Select(d => d.Instances)
                     .FirstOrDefault();
         }
 
+        public List<InstanceState> InstanceState(string loadBalancerName)
+        {
+            if (string.IsNullOrEmpty(loadBalancerName))
+                throw new ArgumentNullException("loadBalancerName");
+
+            var result = client.DescribeInstanceHealth(new DescribeInstanceHealthRequest(loadBalancerName));
+            return result.DescribeInstanceHealthResult.InstanceStates;
+        } 
 
         private AmazonElasticLoadBalancing ElbClient()
         {
