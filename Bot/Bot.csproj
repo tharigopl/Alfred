@@ -66,13 +66,17 @@
     <Compile Include="Commands\Attributes\AwsCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\AwsElbCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\AwsElbStatusCommandAttribute.cs" />
+    <Compile Include="Commands\Attributes\AwsElbRepairCommandAttribute.cs" />
     <Compile Include="Commands\AWS\AwsCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbHelpCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbInstancesCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbListCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbStatusCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbStatusHelpCommand.cs" />
     <Compile Include="Commands\AWS\AwsHelpCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbRepairCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbRepairHelpCommand.cs" />
     <Compile Include="Commands\BuildStatusCommand.cs" />
     <Compile Include="Commands\CompleteCommand.cs" />
     <Compile Include="Commands\DiceCommand.cs" />
