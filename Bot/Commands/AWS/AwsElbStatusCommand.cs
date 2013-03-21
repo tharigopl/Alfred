@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Amazon.EC2.Model;
 using Amazon.ElasticLoadBalancing.Model;
 using Bot.Commands.Attributes;
 using Bot.Infrastructure.AWS;
@@ -14,12 +13,10 @@ namespace Bot.Commands.AWS
     public class AwsElbStatusCommand : IrcCommandProcessor
     {
         private readonly ELB elb;
-        private readonly EC2 ec2;
 
         public AwsElbStatusCommand()
         {
             this.elb = new ELB();
-            this.ec2 = new EC2();
         }
 
         public override void Process(IrcCommand command)
@@ -36,31 +33,31 @@ namespace Bot.Commands.AWS
 
         private string GetInstanceStatusMessage()
         {
-            var instanceIds = GetInstanceIds();
+            var states = GetInstanceStates();
 
-            if (instanceIds == null || instanceIds.Count == 0)
+            if (states == null || states.Count == 0)
                 return string.Format(
                     "Sorry, {0}, but that load balancer either doesn't exist or doesn't have any instances attached to it.", 
                     this.command.Source.Name
                 );
 
-            var instanceStatus = ec2.InstanceStatus(instanceIds);
-            var statusCountMessage = GetStatusCountMessage(instanceStatus);
+            var statusCountMessage = GetStatusCountMessage(states);
 
             return string.Format(
                 "{0} instances attached: {1}",
-                instanceIds.Count,
+                states.Count,
                 statusCountMessage
             );
         }
 
-        private string GetStatusCountMessage(List<InstanceStatus> instanceStatus)
+        private string GetStatusCountMessage(List<InstanceState> instanceStates)
         {
-            var statusCounts = instanceStatus
-                .GroupBy(s => s.InstanceState.Name)
+            var statusCounts = instanceStates
+                .GroupBy(s => s.State)
                 .Select(g => string.Format(
-                        "{0} are {1}",
+                        "{0} {1} {2}",
                         g.Count(),
+                        g.Count() == 1 ? "is" : "are",
                         g.Key
                     )
                 )
@@ -75,10 +72,11 @@ namespace Bot.Commands.AWS
             return statusCountMessage;
         }
 
-        private List<string> GetInstanceIds()
+        private List<InstanceState> GetInstanceStates()
         {
-            var instances = elb.Instances(command.Parameters.First());
-            return instances.Select(i => i.InstanceId).ToList();
+            var elbName = command.Parameters.First();
+            var states = elb.InstanceState(elbName);
+            return states;
         }
 
     }
