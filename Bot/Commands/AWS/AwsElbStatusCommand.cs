@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Amazon.ElasticLoadBalancing.Model;
 using Bot.Commands.Attributes;
 using Bot.Infrastructure.AWS;
+using Bot.Data;
 
 namespace Bot.Commands.AWS
 {
@@ -40,7 +41,7 @@ namespace Bot.Commands.AWS
                     "Sorry, {0}, but that load balancer either doesn't exist or doesn't have any instances attached to it.", 
                     this.command.Source.Name
                 );
-
+           
             var statusCountMessage = GetStatusCountMessage(states);
 
             return string.Format(
@@ -76,6 +77,8 @@ namespace Bot.Commands.AWS
         {
             var elbName = command.Parameters.First();
             var states = elb.InstanceState(elbName);
+            if(states != null && states.Count>0)
+                ElbState.UpdateStatus(elbName, states);
             return states;
         }
 
