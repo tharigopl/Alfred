@@ -10,6 +10,7 @@ namespace Bot.Commands
     public class IrcCommand
     {
         public IrcBot Bot { get; protected set; }
+        public IrcBotUser User { get; protected set; }
         public IrcClient Client { get; protected set; }
         public string Name { get; protected set; }
         public string[] Parameters { get; protected set; }
@@ -20,6 +21,7 @@ namespace Bot.Commands
 
         public IrcCommand(
             IrcBot bot, 
+            IrcBotUser user,
             IrcClient client, 
             string[] parameters, 
             IIrcMessageTarget target, 
@@ -27,6 +29,7 @@ namespace Bot.Commands
         )
         {
             this.Bot = bot;
+            this.User = user;
             this.Client = client;
             this.Target = target;
             this.Source = source;
@@ -38,6 +41,11 @@ namespace Bot.Commands
         {
             this.Name = Parameters[0].ToLower();
             TrimParameters(1);
+        }
+
+        public bool HasUser
+        {
+            get { return User != null; }
         }
 
         protected virtual void ParseParameters(string[] parameters)

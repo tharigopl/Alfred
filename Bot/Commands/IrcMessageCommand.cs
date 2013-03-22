@@ -11,12 +11,13 @@ namespace Bot.Commands
     {
         public IrcMessageCommand(
             IrcBot bot, 
+            IrcBotUser user,
             IrcClient client, 
             string[] parameters, 
             IIrcMessageTarget target, 
             IIrcMessageSource source
         )
-            : base (bot, client, parameters, target, source)
+            : base (bot, user, client, parameters, target, source)
         {}
 
         protected override void ParseParameters(string[] parameters)

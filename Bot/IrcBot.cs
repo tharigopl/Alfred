@@ -63,6 +63,13 @@ namespace Bot
             this.users.TryAdd(user.NickName, user);
         }
 
+        private IrcBotUser GetUser(string nickName)
+        {
+            IrcBotUser user;
+            this.users.TryGetValue(nickName, out user);
+            return user;
+        }
+
         private async Task Start()
         {
             await Task.Run(() => {
@@ -176,6 +183,7 @@ namespace Bot
             if (IsValidChannelCommand(parts)) {
                 var command = new IrcCommand(
                     this,
+                    GetUser(e.Source.Name),
                     this.client,
                     parts,
                     channel,
@@ -250,6 +258,7 @@ namespace Bot
             {
                 var command = new IrcMessageCommand(
                     this,
+                    GetUser(e.Source.Name),
                     this.client,
                     parts,
                     e.Source as IIrcMessageTarget,
