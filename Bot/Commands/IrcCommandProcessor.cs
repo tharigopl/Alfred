@@ -19,7 +19,7 @@ namespace Bot.Commands
 
         protected bool HasParameters { get { return this.command.Parameters.Length != 0; } }
 
-        protected void SendChannelMessage(string message)
+        protected void SendMessage(string message)
         {
             if (this.command == null) return;
             if (string.IsNullOrEmpty(message)) return;
@@ -30,12 +30,12 @@ namespace Bot.Commands
             );
         }
 
-        protected void SendChannelMessages(IEnumerable<string> messages)
+        protected void SendMessages(IEnumerable<string> messages)
         {
             if (this.command == null) return;
 
             foreach (var message in messages)
-                SendChannelMessage(message);
+                SendMessage(message);
         }
 
         protected void SendNotice(string message)
@@ -79,7 +79,7 @@ namespace Bot.Commands
             if (!HasParameters)
             {
                 if (publicMessage)
-                    SendChannelMessage(prompt);
+                    SendMessage(prompt);
                 else
                     SendNotice(prompt);
 
@@ -92,7 +92,8 @@ namespace Bot.Commands
 
         protected void ShowHelp(IIrcCommandProcessor helpCommand)
         {
-            helpCommand.Process(this.command);
+            if (helpCommand != null)
+                helpCommand.Process(this.command);
         }
     }
 }

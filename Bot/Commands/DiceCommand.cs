@@ -17,7 +17,7 @@ namespace Bot.Commands
 			var roll = random.Next(1, dice * sides);
 			var result = "I rolled a " + roll;
 			
-			SendChannelMessage(result);
+			SendMessage(result);
 		}
 	}
 }

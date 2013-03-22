@@ -19,7 +19,7 @@ namespace Bot.Commands
 		public override void Process(IrcCommand command)
 		{
 			base.Process(command);
-			SendChannelMessage(Responses.Random());
+			SendMessage(Responses.Random());
 		}
 	}
 }

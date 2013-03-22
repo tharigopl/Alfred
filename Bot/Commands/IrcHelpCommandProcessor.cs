@@ -20,7 +20,7 @@ namespace Bot.Commands
                 "I'll respond to these commands: {2}" :
                 "I'll respond to these {1} commands: {2}";
 
-            SendChannelMessage(
+            SendMessage(
                 string.Format(
                     format,
                     command.Bot.Configuration.NickName,

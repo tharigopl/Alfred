@@ -16,7 +16,7 @@ namespace Bot.Commands
         {
             base.Process(command);
 
-            SendChannelMessage(
+            SendMessage(
                 string.Format("Ok {0}, I'm outta here!", command.Source.Name)
             );
 

@@ -21,7 +21,7 @@ namespace Bot.Commands
 			var task = uri.Download();
 			if (task.IsFaulted || task.IsCanceled)
 			{
-				SendChannelMessage("Sorry master, I could not complete the phrase");
+				SendMessage("Sorry master, I could not complete the phrase");
 			}
 			else
 			{
@@ -29,13 +29,13 @@ namespace Bot.Commands
 				var suggestions = xml.Descendants("suggestion");
 				if (!suggestions.Any())
 				{
-					SendChannelMessage("Sorry master, I have no suggestions.");
+					SendMessage("Sorry master, I have no suggestions.");
 					return;
 				}
 
 				foreach (var node in suggestions)
 				{
-					SendChannelMessage(node.Attribute("data").Value);
+					SendMessage(node.Attribute("data").Value);
 				}
 			}
 		}
