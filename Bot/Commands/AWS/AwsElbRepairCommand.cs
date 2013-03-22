@@ -27,6 +27,9 @@ namespace Bot.Commands.AWS
         {
             base.Process(command);
 
+            if (!HasAdminUser())
+                return;
+
             var message = string.Format("I'm going to need a little more information, {0}.", command.Source.Name);
             if (HandleNoParameters(message, new AwsElbRepairHelpCommand()))
                 return;
