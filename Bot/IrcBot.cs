@@ -129,7 +129,7 @@ namespace Bot
         private void OnChannelMessageReceived(object sender, IrcMessageEventArgs e)
         {
             var channel = sender as IrcChannel;
-            var parts = e.Text.Split(' ');
+            var parts = e.Text.Trim().Split(' ');
 
             if (IsValidChannelCommand(parts)) {
                 var command = new IrcCommand(
