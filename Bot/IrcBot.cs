@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using IrcDotNet;
 using System;
 using System.Collections.Generic;
@@ -123,6 +124,37 @@ namespace Bot
         {
             this.client.Registered += OnRegistered;
             this.client.Disconnected += OnDisconnected;
+            this.client.RawMessageReceived += OnRawMessageReceived;
+        }
+
+        private void OnRawMessageReceived(object sender, IrcRawMessageEventArgs e)
+        {
+            if (e.Message.Command == "NICK")
+            {
+                var oldNick = e.Message.Source.Name;
+                var newNick = e.Message.Parameters.FirstOrDefault();
+                HandleNickChange(oldNick, newNick);
+            }
+        }
+
+        private void HandleNickChange(string oldNick, string newNick)
+        {
+            IrcBotUser user;
+            if (this.users.TryRemove(oldNick, out user))
+            {
+                user.NickName = newNick;
+                if (this.users.TryAdd(user.NickName, user))
+                {
+                    this.client.LocalUser.SendMessage(
+                        new string[] { newNick },
+                        string.Format(
+                            "I see you've chosen a new name, {0}. Your active user ({1}) has been updated.",
+                            newNick,
+                            user.UserName
+                        )
+                    );
+                }
+            }
         }
 
         private void OnDisconnected(object sender, EventArgs e)
@@ -133,6 +165,7 @@ namespace Bot
         private void SubscribeToChannelEvents(IrcChannel channel)
         {
             channel.MessageReceived += OnChannelMessageReceived;
+            channel.UserLeft += OnUserLeft;
         }
 
         private void OnChannelMessageReceived(object sender, IrcMessageEventArgs e)
@@ -151,6 +184,12 @@ namespace Bot
 
                 ProcessCommand(command);
             }
+        }
+
+        private void OnUserLeft(object sender, IrcChannelUserEventArgs e)
+        {
+            IrcBotUser user;
+            this.users.TryRemove(e.ChannelUser.User.NickName, out user);
         }
 
         private bool IsValidChannelCommand(string[] commandParts)
@@ -205,7 +244,7 @@ namespace Bot
 
         private void OnMessageReceived(object sender, IrcMessageEventArgs e)
         {
-            var parts = e.Text.Split(' ');
+            var parts = e.Text.Trim().Split(' ');
 
             if (!e.Source.Name.Equals(this.Configuration.NickName, StringComparison.OrdinalIgnoreCase))
             {
