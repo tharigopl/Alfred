@@ -72,6 +72,7 @@
     <Compile Include="Commands\AWS\AwsElbCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbHelpCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbInstancesCommand.cs" />
+    <Compile Include="Commands\AWS\AwsElbInstanceUrlsCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbListCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbStatusCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbStatusHelpCommand.cs" />
