@@ -46,7 +46,7 @@ namespace Bot.Commands.User
         {
             user = ParseParameters();
             var repository = new UsersRepository();
-            return repository.Save(user);
+            return repository.TrySave(user);
         }
 
         private void SendRegisteredMessages(Data.User user)

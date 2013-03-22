@@ -17,7 +17,28 @@ namespace Bot.Data
             this.database = new Database();
         }
 
-        public bool Save(User newUser)
+        public bool TryGet(out Users users)
+        {
+            lock (locker)
+            {
+                try
+                {
+                    using (var session = this.database.OpenSession())
+                    {
+                        users = session.Load<Users>("users") ?? new Users();
+                    }
+                }
+                catch
+                {
+                    users = new Users();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool TrySave(User newUser)
         {
             lock (locker)
             {

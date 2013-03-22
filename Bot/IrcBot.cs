@@ -1,4 +1,5 @@
-﻿using IrcDotNet;
+﻿using System.Collections.Concurrent;
+using IrcDotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace Bot
         private readonly IrcClient client;
         private bool isRegistered;
 
+        private ConcurrentDictionary<string, IrcBotUser> users;
+
         private static IrcCommandProcessorFactory commandProcessorFactory = 
             new IrcCommandProcessorFactory(
                 typeof(IrcCommandProcessor).SubclassesWithAttribute<IrcCommandAttribute>()
@@ -30,6 +33,7 @@ namespace Bot
         public IrcBot(IrcBotConfiguration configuration)
         {
             this.tasks = new List<IIrcTask>();
+            this.users = new ConcurrentDictionary<string, IrcBotUser>();
 
             configuration.UserName = configuration.UserName ?? configuration.NickName;
             configuration.RealName = configuration.RealName?? configuration.NickName;
@@ -51,6 +55,11 @@ namespace Bot
                 WaitForRegistration();
                 await Start();
             }
+        }
+
+        public void RegisterUser(IrcBotUser user)
+        {
+            this.users.TryAdd(user.NickName, user);
         }
 
         private async Task Start()
