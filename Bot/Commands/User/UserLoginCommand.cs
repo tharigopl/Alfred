@@ -31,16 +31,18 @@ namespace Bot.Commands.User
             string message = string.Empty;
             Data.User user;
 
-            if (!TryLogin(username, password, out message, out user))
+            if (TryLogin(username, password, out message, out user))
             {
-                SendPrivateMessage(message);
+                command.Bot.RegisterUser(
+                    new IrcBotUser {
+                        UserName = username,
+                        NickName = command.Source.Name,
+                        IsAdmin = user.IsAdmin
+                    }
+                );
             }
 
-            command.Bot.RegisterUser(
-                new IrcBotUser {
-                    NickName = command.Source.Name
-                }
-            );
+            SendPrivateMessage(message);
         }
 
         private bool TryLogin(string username, string password, out string message, out Data.User user)
