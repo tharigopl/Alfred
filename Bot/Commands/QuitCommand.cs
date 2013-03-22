@@ -16,6 +16,9 @@ namespace Bot.Commands
         {
             base.Process(command);
 
+            if (!HasAdminUser())
+                return;
+
             SendMessage(
                 string.Format("Ok {0}, I'm outta here!", command.Source.Name)
             );
