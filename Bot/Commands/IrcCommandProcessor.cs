@@ -95,5 +95,28 @@ namespace Bot.Commands
             if (helpCommand != null)
                 helpCommand.Process(this.command);
         }
+
+        protected bool HasAdminUser()
+        {
+            if (!command.HasUser)
+            {
+                SendMessage("You need to be logged in to use this command.");
+                return false;
+            }
+
+            if (!command.User.IsAdmin)
+            {
+                SendMessage(
+                    string.Format(
+                        "I'm sorry, {0}, you need to be an administrator to use this command.",
+                        command.Source.Name
+                        )
+                    );
+
+                return false;
+            }
+
+            return true;
+        }
     }
 }
