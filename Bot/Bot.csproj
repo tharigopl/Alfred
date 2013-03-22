@@ -92,6 +92,7 @@
     <Compile Include="Commands\IrcHelpCommandProcessor.cs" />
     <Compile Include="Commands\IrcMessageCommand.cs" />
     <Compile Include="Commands\SnackCommand.cs" />
+    <Compile Include="Commands\User\UserLoginHelpCommand.cs" />
     <Compile Include="Commands\User\UserCommand.cs" />
     <Compile Include="Commands\User\UserHelpCommand.cs" />
     <Compile Include="Commands\User\UserLoginCommand.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="Commands\IrcCommandProcessorFactory.cs" />
     <Compile Include="Commands\QuitCommand.cs" />
     <Compile Include="Commands\UnsupportedCommand.cs" />
+    <Compile Include="IrcBotUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\IrcTaskMessageEventArgs.cs" />
     <Compile Include="Tasks\IIrcTask.cs" />
