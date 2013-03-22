@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Bot.Commands.Attributes;
 using Bot.Infrastructure.AWS;
-//using Bot.Data;
 
 namespace Bot.Commands.AWS
 {

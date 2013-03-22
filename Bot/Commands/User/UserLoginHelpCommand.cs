@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Bot.Commands.User
 {
-    public class UserRegisterHelpCommand : IrcCommandProcessor
+    public class UserLoginHelpCommand : IrcCommandProcessor
     {
         public override void Process(IrcCommand command)
         {
             base.Process(command);
 
-            SendPrivateMessage("usage: register <username> <password> <email>");
+            SendPrivateMessage("usage: login <username> <password>");
         }
 
     }

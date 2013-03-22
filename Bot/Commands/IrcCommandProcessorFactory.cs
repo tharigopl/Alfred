@@ -16,11 +16,11 @@ namespace Bot.Commands
             this.commandMap = processors;
         }
 
-        public IIrcCommandProcessor CreateByCommand(IrcCommand command)
+        public IIrcCommandProcessor CreateByCommand(IrcCommand channelCommand)
         {
-            if (!string.IsNullOrEmpty(command.Name) && this.commandMap.ContainsKey(command.Name))
+            if (!string.IsNullOrEmpty(channelCommand.Name) && this.commandMap.ContainsKey(channelCommand.Name))
             {
-                var type = this.commandMap[command.Name];
+                var type = this.commandMap[channelCommand.Name];
                 var instance = Activator.CreateInstance(type);
                 return (IIrcCommandProcessor)instance;
             }

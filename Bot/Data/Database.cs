@@ -28,7 +28,10 @@ namespace Bot.Data
                 {
                     if (Database.store == null)
                     {
-                        Database.store = new EmbeddableDocumentStore { ConnectionStringName = "Local" };
+                        Database.store = new EmbeddableDocumentStore {
+                            ConnectionStringName = "Local",
+                            UseEmbeddedHttpServer = true
+                        };
                         Database.store.Initialize();
                     }
                 }

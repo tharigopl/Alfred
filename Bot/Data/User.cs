@@ -11,5 +11,12 @@ namespace Bot.Data
         public string UserName { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
+        public bool IsAdmin { get; set; }
+    }
+
+    public class AwsSettings
+    {
+        public string ApiKey { get; set; }
+        public string ApiSecret { get; set; }
     }
 }

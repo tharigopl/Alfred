@@ -17,27 +17,59 @@ namespace Bot.Data
             this.database = new Database();
         }
 
-        public void Save(User user)
+        public bool TryGet(out Users users)
+        {
+            lock (locker)
+            {
+                try
+                {
+                    using (var session = this.database.OpenSession())
+                    {
+                        users = session.Load<Users>("users") ?? new Users();
+                    }
+                }
+                catch
+                {
+                    users = new Users();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool TrySave(User newUser)
         {
             lock (locker)
             {
                 using (var session = this.database.OpenSession())
                 {
-                    var users = session.Load<Users>("users");
+                    var users = session.Load<Users>("users") ?? new Users();
 
-                    if (users == null) users = new Users();
-
-                    // might already exist
-                    if (users.Items.Where(u => u.UserName.ToLower() == user.UserName.ToLower()).Any())
+                    if (UserAlreadyExists(newUser, users))
                     {
-                        return; // TODO: do something better
+                        return false;
                     }
 
-                    users.Items.Add(user);
-                    session.Store(users);
+                    users.Items.Add(newUser);
                     session.SaveChanges();
                 }
             }
+
+            return true;
+        }
+
+        private bool UserAlreadyExists(User newUser, Users users)
+        {
+            return users
+                .Items
+                .Any(
+                    user =>
+                    user.UserName.Equals(
+                        newUser.UserName,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                );
         }
     }
 }
