@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using IrcDotNet;
+using Bot.Extensions;
 
 namespace Bot.Commands
 {
@@ -19,23 +20,38 @@ namespace Bot.Commands
 
         protected bool HasParameters { get { return this.command.Parameters.Length != 0; } }
 
-        protected void SendMessage(string message)
+        /// <summary>
+        /// Override this property to provide HandleNoParameters with random phrases/messages to use.
+        /// </summary>
+        protected virtual IEnumerable<string> RandomMessages { get { return new string[0]; } }
+
+        protected void SendMessage(string message, bool forcePrivate = false)
         {
             if (this.command == null) return;
             if (string.IsNullOrEmpty(message)) return;
 
-            this.command.Client.LocalUser.SendMessage(
-                this.command.Target,
-                message
-            );
+            if (forcePrivate)
+            {
+                this.command.Client.LocalUser.SendMessage(
+                    command.Source.Name,
+                    message
+                );
+            }
+            else
+            {
+                this.command.Client.LocalUser.SendMessage(
+                    this.command.Target,
+                    message
+                );
+            }
         }
 
-        protected void SendMessages(IEnumerable<string> messages)
+        protected void SendMessages(IEnumerable<string> messages, bool forcePrivate = false)
         {
             if (this.command == null) return;
 
             foreach (var message in messages)
-                SendMessage(message);
+                SendMessage(message, forcePrivate);
         }
 
         protected void SendNotice(string message)
@@ -43,7 +59,7 @@ namespace Bot.Commands
             if (this.command == null) return;
 
             this.command.Client.LocalUser.SendNotice(
-                this.command.Source as IIrcMessageTarget,
+                this.command.Source.Name,
                 message
             );
         }
@@ -61,7 +77,7 @@ namespace Bot.Commands
             if (this.command == null) return;
 
             this.command.Client.LocalUser.SendMessage(
-                this.command.Source as IIrcMessageTarget,
+                this.command.Source.Name,
                 message
             );
         }
@@ -74,14 +90,41 @@ namespace Bot.Commands
                 SendPrivateMessage(message);
         }
 
-        protected bool HandleNoParameters(string prompt, IIrcCommandProcessor helpCommand, bool publicMessage = true)
+        /// <summary>
+        /// If no parameters, output a random message if available then run the given command.
+        /// </summary>
+        /// <param name="helpCommand"></param>
+        /// <returns>true if no parameters passed, false if parameters passed</returns>
+        protected bool HandleNoParameters(IIrcCommandProcessor helpCommand, bool forcePrivate = false)
+        {
+            var prompt = this.RandomMessages.Random();
+            return HandleNoParameters(prompt, helpCommand, forcePrivate);
+        }
+
+        /// <summary>
+        /// If no parameters, output the given prompt.
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <param name="forcePrivate"></param>
+        /// <returns>true if no parameters passed, false if parameters passed</returns>
+        protected bool HandleNoParameters(string prompt, bool forcePrivate = false)
+        {
+            return HandleNoParameters(prompt, null, forcePrivate);
+        }
+
+        /// <summary>
+        /// If no parameters, output the given prompt then run the given command.
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <param name="helpCommand"></param>
+        /// <param name="forcePrivate"></param>
+        /// <returns>true if no parameters passed, false if parameters passed</returns>
+        protected bool HandleNoParameters(string prompt, IIrcCommandProcessor helpCommand, bool forcePrivate = false)
         {
             if (!HasParameters)
             {
-                if (publicMessage)
-                    SendMessage(prompt);
-                else
-                    SendNotice(prompt);
+                if (!string.IsNullOrEmpty(prompt))
+                    SendMessage(prompt, forcePrivate);
 
                 Thread.Sleep(1000);
                 ShowHelp(helpCommand);
