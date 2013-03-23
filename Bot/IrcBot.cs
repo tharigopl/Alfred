@@ -152,8 +152,7 @@ namespace Bot
                 user.NickName = newNick;
                 if (this.users.TryAdd(user.NickName, user))
                 {
-                    this.client.LocalUser.SendMessage(
-                        new string[] { newNick },
+                    SendMessage(newNick,
                         string.Format(
                             "I see you've chosen a new name, {0}. Your active user ({1}) has been updated.",
                             newNick,
@@ -161,7 +160,16 @@ namespace Bot
                         )
                     );
                 }
+                else
+                {
+                    SendMessage(newNick, "Sorry, you've been logged out.");
+                }
             }
+        }
+
+        private void SendMessage(string nick, string message)
+        {
+            this.client.LocalUser.SendMessage(nick, message);
         }
 
         private void OnDisconnected(object sender, EventArgs e)
