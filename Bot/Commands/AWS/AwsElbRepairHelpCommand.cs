@@ -14,7 +14,7 @@ namespace Bot.Commands.AWS
             base.Process(command);
 
             SendMessage(
-                "It's easy! Just type this: aws elb repair <load balancer name>"
+                "It's easy! Just type this: aws elb repair <load balancer name>. If you need a list of load balancers, that command is: aws elb list."
             );
         }
     }

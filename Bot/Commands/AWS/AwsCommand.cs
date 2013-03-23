@@ -21,7 +21,7 @@ namespace Bot.Commands.AWS
         {
             base.Process(command);
 
-            if (HandleNoParameters("Yeah, AWS is cool, so what?", new AwsHelpCommand()))
+            if (HandleNoParameters(new AwsHelpCommand()))
                 return;
 
             command.Shift();

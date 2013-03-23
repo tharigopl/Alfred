@@ -26,9 +26,14 @@ namespace Bot.Commands.AWS
                 command.Source.Name
             );
 
-            if (HandleNoParameters(message, null))
+            if (HandleNoParameters(message))
+            {
+                SendMessage("Try: aws elb instances <load balancer name>. If you need a list of load balancers, that command is: aws elb list.");
                 return;
+            }
 
+
+            SendMessage("retrieving elb status and ec2 instance urls...");
             GetInstanceStates();
             GetDescriptions();
             PrintUrls();

@@ -17,7 +17,7 @@ namespace Bot.Commands.User
             base.Process(command);
             var helpCommand = new UserLoginHelpCommand();
 
-            if (HandleNoParameters(string.Empty, helpCommand, false))
+            if (HandleNoParameters(helpCommand, forcePrivate: true))
                 return;
 
             if (command.Parameters[0] == "help" || !ValidParameters())

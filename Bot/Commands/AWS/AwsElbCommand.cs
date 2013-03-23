@@ -20,7 +20,7 @@ namespace Bot.Commands.AWS
         {
             base.Process(command);
 
-            if (HandleNoParameters("I really like ELB, too!", new AwsElbHelpCommand()))
+            if (HandleNoParameters(new AwsElbHelpCommand()))
                 return;
 
             command.Shift();

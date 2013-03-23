@@ -15,8 +15,16 @@ namespace Bot.Commands.AWS
         {
             base.Process(command);
 
-            if (HandleNoParameters("I need the load balancer name.", null))
+            var message = string.Format(
+                "I need the name of the load balancer, {0}.",
+                command.Source.Name
+            );
+
+            if (HandleNoParameters(message))
+            {
+                SendMessage("Try: aws elb instances <load balancer name>. If you need a list of load balancers, that command is: aws elb list.");
                 return;
+            }
 
             var loadBalancerName = command.Parameters[0];
             var elb = new ELB();
