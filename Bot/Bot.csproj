@@ -104,6 +104,7 @@
     <Compile Include="Data\ModelBase.cs" />
     <Compile Include="Data\Users.cs" />
     <Compile Include="Data\UsersRepository.cs" />
+    <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Formatters\BuildStatusFormatter.cs" />
     <Compile Include="Formatters\IFormatter.cs" />
