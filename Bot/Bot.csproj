@@ -91,6 +91,7 @@
     <Compile Include="Commands\IrcExtensionMethods.cs" />
     <Compile Include="Commands\IrcHelpCommandProcessor.cs" />
     <Compile Include="Commands\IrcMessageCommand.cs" />
+    <Compile Include="Commands\SayCommand.cs" />
     <Compile Include="Commands\SnackCommand.cs" />
     <Compile Include="Commands\User\UserLoginHelpCommand.cs" />
     <Compile Include="Commands\User\UserCommand.cs" />
