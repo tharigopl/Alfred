@@ -141,13 +141,7 @@ namespace Bot.Commands
 
         protected bool HasAdminUser()
         {
-            if (!command.HasUser)
-            {
-                SendMessage("You need to be logged in to use this command.");
-                return false;
-            }
-
-            if (!command.User.IsAdmin)
+            if (!command.HasUser || !command.User.IsAdmin)
             {
                 SendMessage(
                     string.Format(
@@ -155,7 +149,6 @@ namespace Bot.Commands
                         command.Source.Name
                         )
                     );
-
                 return false;
             }
 
