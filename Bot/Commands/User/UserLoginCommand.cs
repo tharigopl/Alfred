@@ -37,7 +37,8 @@ namespace Bot.Commands.User
                     new IrcBotUser {
                         UserName = username,
                         NickName = command.Source.Name,
-                        IsAdmin = user.IsAdmin
+                        IsAdmin = user.IsAdmin,
+                        IsBotAdmin = user.IsBotAdmin
                     }
                 );
             }

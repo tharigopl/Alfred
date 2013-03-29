@@ -11,5 +11,6 @@ namespace Bot
         public string UserName { get; set; }
         public string NickName { get; set; }
         public bool IsAdmin { get; set; }
+        public bool IsBotAdmin { get; set; }
     }
 }

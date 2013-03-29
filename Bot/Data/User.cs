@@ -12,6 +12,7 @@ namespace Bot.Data
         public string Password { get; set; }
         public string Email { get; set; }
         public bool IsAdmin { get; set; }
+        public bool IsBotAdmin { get; set; }
     }
 
     public class AwsSettings
