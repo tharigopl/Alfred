@@ -100,7 +100,7 @@
     <Compile Include="Commands\User\UserRegisterCommand.cs" />
     <Compile Include="Commands\User\UserRegisterHelpCommand.cs" />
     <Compile Include="Data\Database.cs" />
-    <Compile Include="Data\ElbState.cs" />
+    <Compile Include="Infrastructure\AWS\ElbState.cs" />
     <Compile Include="Data\User.cs" />
     <Compile Include="Data\ModelBase.cs" />
     <Compile Include="Data\Users.cs" />
@@ -112,6 +112,8 @@
     <Compile Include="Infrastructure\AWS\AwsClient.cs" />
     <Compile Include="Infrastructure\AWS\EC2.cs" />
     <Compile Include="Infrastructure\AWS\ELB.cs" />
+    <Compile Include="Infrastructure\AWS\OutTimeState.cs" />
+    <Compile Include="Infrastructure\SystemTime.cs" />
     <Compile Include="IrcBot.cs" />
     <Compile Include="IrcBotConfiguration.cs" />
     <Compile Include="Commands\IrcCommand.cs" />

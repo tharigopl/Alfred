@@ -15,73 +15,100 @@ namespace Bot.Tasks
     public class IrcElbStatusTask : IrcTask
     {
         private readonly string elbName;
-        private readonly IIrcMessageFormatter<SyndicationItem> formatter;
-        private int lastBuildNumberReported = 0;
         private readonly ELB elb;
-        private readonly EC2 ec2;
-        private DateTime LastCheckTime;
-        private int InCount;
-        private int OutCount;
+        private int lastIn, currentIn;
+        private int lastOut, currentOut;
+        private List<InstanceState> states;
 
         public IrcElbStatusTask(string elbName)
         {
-            this.formatter = new BuildStatusFormatter();
-
             this.elbName = elbName;
             this.Name = "Elb Status Task";
             this.action = this.Run;
             
             this.elb = new ELB();
-            this.ec2 = new EC2();
         }
 
         public void Run()
         {
             while (!this.cancellationToken.IsCancellationRequested)
             {
-                var states = elb.InstanceState(this.elbName);
-
-                if (StatesChanged(states))
+                GetState();
+                UpdateState();
+                if (StateChanged())
                 {
-                    
-                    SendMessages(FormatMessage());
+                    SendMessage(FormatMessage());
+                    SaveState();
                 }
 
                 Thread.Sleep(15000);
             }
         }
 
-        private IEnumerable<string> FormatMessage()
+        private void GetState()
         {
-            var messages = new List<string>{
-                string.Format("Elb {0}: InService: {1}, OutOfService: {2}", this.elbName, this.InCount, this.OutCount)
-            };
-
-            foreach (var state in ElbState.GetStates(this.elbName))
-            {
-                messages.Add(string.Format("Instance {0} has been out for {1}", state.State.InstanceId, state.TimeSincePulled()));
-            }
-
-            return messages;
+            this.states = elb.InstanceState(this.elbName);
         }
 
-        private bool StatesChanged(List<InstanceState> states)
+        private void UpdateState()
         {
             ElbState.UpdateStatus(this.elbName, states);
-            bool changed = false;
-            var inService = states.Count(s => s.State == "InService");
-            var outOfService = states.Count(s => s.State == "OutOfService");
-            if (InCount != inService || OutCount != outOfService)
-            {
-                changed = true;
-            }
-            InCount = inService;
-            OutCount = outOfService;
-            return changed;
 
+            this.currentIn = this.lastIn;
+            this.currentOut = this.lastOut;
+
+            var stateMap = this.states
+                .GroupBy(s => s.State)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Count()
+                );
+
+            stateMap.TryGetValue("InService", out currentIn);
+            stateMap.TryGetValue("OutOfService", out currentOut);
         }
 
-        
+        private bool StateChanged()
+        {
+            return !(lastIn == currentIn && lastOut == currentOut);
+        }
+
+        private void SaveState()
+        {
+            lastIn = currentIn;
+            lastOut = currentOut;
+        }
+
+        private string FormatMessage()
+        {
+            var header = string.Format(
+                    @"ELB {0} // in: {1} out: {2}",
+                    this.elbName,
+                    this.currentIn,
+                    this.currentOut
+            );
+
+            var states = string.Join(", ",
+                ElbState.GetStates(this.elbName)
+                .Select(state =>
+                    string.Format(
+                        "{0} ({1})",
+                        state.State.InstanceId,
+                        state.TimeSincePulled()
+                    )
+                )
+                .ToArray()
+            );
+
+            var message = string.Format(
+                "{0} {1} {2}",
+                header,
+                states.Length > 0 ? "//" : string.Empty,
+                states
+            );
+
+            return message;
+        }
         
     }
 }
