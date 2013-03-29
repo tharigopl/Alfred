@@ -125,9 +125,9 @@ namespace Bot.Tasks
             this.ec2.RebootInstances(expiredInstanceIds);
 
             var message = string.Format(
-                "{0} instance{1} been out of service for > 10m, sending reboot message to: {2}",
+                "{0} instance{1} out > 10m, rebooting: {2}",
                 expiredInstances.Count,
-                expiredInstances.Count > 1 ? "s have" : " has",
+                expiredInstances.Count > 1 ? "s" : string.Empty,
                 string.Join(", ", expiredInstances.Select(i => i.Format()))
             );
 
