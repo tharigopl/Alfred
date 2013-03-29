@@ -68,6 +68,14 @@ namespace Bot.Tasks
             }
         }
 
+        protected void SendMessage(string message)
+        {
+            if (OnMessage != null)
+            {
+                OnMessage(this, new IrcTaskMessageEventArgs(new string[] { message }));
+            }
+        }
+
         protected void SendMessages(IEnumerable<string> messages)
         {
             if (OnMessage != null)
