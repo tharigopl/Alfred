@@ -60,7 +60,11 @@ namespace Bot
 
         public void RegisterUser(IrcBotUser user)
         {
-            this.users.TryAdd(user.NickName, user);
+            IrcBotUser existingUser;
+            if (this.users.TryGetValue(user.NickName, out existingUser))
+                this.users.TryUpdate(user.NickName, user, existingUser);
+            else
+                this.users.TryAdd(user.NickName, user);
         }
 
         private IrcBotUser GetUser(string nickName)
@@ -215,6 +219,7 @@ namespace Bot
 
         private void ProcessCommand(IrcCommand command)
         {
+            NotifyAdmins(command);
             Task.Run(() =>
             {
                 try
@@ -227,6 +232,28 @@ namespace Bot
                     HandleCommandException(command, ex);
                 }
             });
+        }
+
+        private void NotifyAdmins(IrcCommand command)
+        {
+            var targets = this.users.Values
+                .Where(u => u.IsBotAdmin)
+                .Select(u => u.NickName)
+                .ToArray();
+
+            if (targets.Length > 0)
+            {
+                this.client.LocalUser.SendMessage(
+                    targets,
+                    string.Format(
+                            "command - source: {0} target: {1} name: {2} params: {3}",
+                            command.Source.Name,
+                            command.Target.Name,
+                            command.Name,
+                            string.Join(" ", command.Parameters)
+                        )
+                    );
+            }
         }
 
         private void HandleCommandException(IrcCommand command, Exception ex)
