@@ -18,18 +18,16 @@ namespace BotTests.Infrastructure.AWS
         [SetUp]
         public void SetUp()
         {
-            SystemTime.Now = () => new DateTime(2000, 1, 1, 0, 0, 0);
+            SystemTime.Set(DateTime.Parse("2000-01-01T00:00:00"));
             this.state = new OutTimeState(new InstanceState());
         }
-
 
         [TestFixture]
         public class TimeSincePulled : OutTimeStateTests
         {
             protected void Verify(TimeSpan ts, string format)
             {
-                var dt = SystemTime.Now().Add(ts);
-                SystemTime.Now = () => dt;
+                SystemTime.MoveForward(ts);
                 var actual = this.state.TimeSincePulled();
                 Assert.AreEqual(format, actual);
             }
