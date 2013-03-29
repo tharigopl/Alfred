@@ -8,9 +8,11 @@ namespace Bot.Infrastructure.AWS
     {
         public InstanceState State { get; internal set; }
         public DateTime TimeRemoved { get; internal set; }
+        public bool Rebooted { get; set;  }
 
         public OutTimeState(InstanceState state)
         {
+            Rebooted = false;
             TimeRemoved = SystemTime.Now();
             State = state;
         }
@@ -28,6 +30,16 @@ namespace Bot.Infrastructure.AWS
             if (ts.Minutes > 0) return ts.ToString(@"m\ms\s");
 
             return ts.ToString(@"s\s");
+        }
+
+        public string Format()
+        {
+            return string.Format(
+                "{0} ({1}{2})",
+                State.InstanceId,
+                TimeSincePulled(),
+                Rebooted ? " - rebooted" : string.Empty
+            );
         }
 
     }
