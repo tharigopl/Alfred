@@ -7,5 +7,6 @@ using Bot.Commands.Attributes;
 
 namespace Bot.Commands.AWS
 {
+    [AwsElbCommand("help")]
     public class AwsElbHelpCommand : IrcHelpCommandProcessor<AwsElbCommandAttribute> { }
 }
