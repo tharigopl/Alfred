@@ -122,11 +122,6 @@ namespace Bot.Tasks
 
             if (expiredInstances.Count <= 0) return;
 
-            foreach (var instance in expiredInstances)
-            {
-                instance.Rebooted = true;
-            }
-
             this.ec2.RebootInstances(expiredInstanceIds);
 
             var message = string.Format(
@@ -135,6 +130,11 @@ namespace Bot.Tasks
                 expiredInstances.Count > 1 ? "s have" : " has",
                 string.Join(", ", expiredInstances.Select(i => i.Format()))
             );
+
+            foreach (var instance in expiredInstances)
+            {
+                instance.Rebooted = true;
+            }
 
             SendMessage(message);
         }
