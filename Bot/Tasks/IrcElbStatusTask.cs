@@ -1,5 +1,6 @@
 ﻿using Amazon.ElasticLoadBalancing.Model;
 using Bot.Formatters;
+using Bot.Infrastructure;
 using Bot.Infrastructure.AWS;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,8 @@ namespace Bot.Tasks
         private int lastIn, currentIn;
         private int lastOut, currentOut;
         private List<InstanceState> states;
+        private string statesFormatted;
+        private EC2 ec2;
 
         public IrcElbStatusTask(string elbName)
         {
@@ -27,6 +30,7 @@ namespace Bot.Tasks
             this.action = this.Run;
             
             this.elb = new ELB();
+            this.ec2 = new EC2();
         }
 
         public void Run()
@@ -40,6 +44,7 @@ namespace Bot.Tasks
                     SendMessage(FormatMessage());
                     SaveState();
                 }
+                RebootExpiredInstances();
 
                 Thread.Sleep(15000);
             }
@@ -66,6 +71,12 @@ namespace Bot.Tasks
 
             stateMap.TryGetValue("InService", out currentIn);
             stateMap.TryGetValue("OutOfService", out currentOut);
+
+            this.statesFormatted = string.Join(", ",
+                ElbState.GetStates(this.elbName)
+                .Select(state => state.Format())
+                .ToArray()
+            );
         }
 
         private bool StateChanged()
@@ -88,27 +99,46 @@ namespace Bot.Tasks
                     this.currentOut
             );
 
-            var states = string.Join(", ",
-                ElbState.GetStates(this.elbName)
-                .Select(state =>
-                    string.Format(
-                        "{0} ({1})",
-                        state.State.InstanceId,
-                        state.TimeSincePulled()
-                    )
-                )
-                .ToArray()
-            );
-
             var message = string.Format(
                 "{0} {1} {2}",
                 header,
-                states.Length > 0 ? "//" : string.Empty,
-                states
+                this.statesFormatted.Length > 0 ? "//" : string.Empty,
+                this.statesFormatted
             );
 
             return message;
         }
+
+        private void RebootExpiredInstances()
+        {
+            var tenMinutesAgo = SystemTime.Now().AddMinutes(-10);
+
+            var expiredInstances = ElbState.GetStates(this.elbName)
+                                   .Where(s => s.TimeRemoved < tenMinutesAgo && !s.Rebooted)
+                                   .Select(s => s)
+                                   .ToList();
+
+            var expiredInstanceIds = expiredInstances.Select(s => s.State.InstanceId).ToArray();
+
+            if (expiredInstances.Count <= 0) return;
+
+            foreach (var instance in expiredInstances)
+            {
+                instance.Rebooted = true;
+            }
+
+            this.ec2.RebootInstances(expiredInstanceIds);
+
+            var message = string.Format(
+                "{0} instance{1} been out of service for > 10m, sending reboot message to: {2}",
+                expiredInstances.Count,
+                expiredInstances.Count > 1 ? "s have" : " has",
+                string.Join(", ", expiredInstances.Select(i => i.Format()))
+            );
+
+            SendMessage(message);
+        }
         
     }
+
 }
