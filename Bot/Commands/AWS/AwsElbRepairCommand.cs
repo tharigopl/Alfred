@@ -57,19 +57,12 @@ namespace Bot.Commands.AWS
 
         private void RebootInstances(List<string> instances)
         {
+            this.ec2.RebootInstances(instances);
+
             var instancesMessage = string.Join(", ", instances.Select(i => i).ToArray());
             SendMessage(
                 string.Format(
-                    "out of service instances detected. rebooting these now: {0}",
-                    instancesMessage
-                )
-            );
-
-            this.ec2.RebootInstances(instances);
-
-            SendMessage(
-                string.Format(
-                    "finished rebooting: {0}",
+                    "out of service instances detected. sent reboot message to: {0}",
                     instancesMessage
                 )
             );
