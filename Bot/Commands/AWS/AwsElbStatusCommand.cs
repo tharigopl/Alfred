@@ -14,6 +14,7 @@ namespace Bot.Commands.AWS
     public class AwsElbStatusCommand : IrcCommandProcessor
     {
         private readonly ELB elb;
+        private string elbName;
 
         public AwsElbStatusCommand()
         {
@@ -42,40 +43,54 @@ namespace Bot.Commands.AWS
                     this.command.Source.Name
                 );
            
-            var statusCountMessage = GetStatusCountMessage(states);
-
-            return string.Format(
-                "{0} instances attached: {1}",
-                states.Count,
-                statusCountMessage
-            );
+            return GetStatusCountMessage(states);
         }
 
         private string GetStatusCountMessage(List<InstanceState> instanceStates)
         {
-            var statusCounts = instanceStates
+            var stateMap = instanceStates
                 .GroupBy(s => s.State)
-                .Select(g => string.Format(
-                        "{0} {1} {2}",
-                        g.Count(),
-                        g.Count() == 1 ? "is" : "are",
-                        g.Key
-                    )
-                )
-                .ToArray();
-
-            var statusCountMessage =
-                string.Join(
-                    ", ",
-                    statusCounts
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Count()
                 );
 
-            return statusCountMessage;
+            int currentIn, currentOut;
+            stateMap.TryGetValue("InService", out currentIn);
+            stateMap.TryGetValue("OutOfService", out currentOut);
+
+            var header = string.Format(
+                    @"ELB {0} // in: {1} out: {2}",
+                    this.elbName,
+                    currentIn,
+                    currentOut
+            );
+
+            var states = string.Join(", ",
+                ElbState.GetStates(this.elbName)
+                .Select(state =>
+                    string.Format(
+                        "{0} ({1})",
+                        state.State.InstanceId,
+                        state.TimeSincePulled()
+                    )
+                )
+                .ToArray()
+            );
+
+            var message = string.Format(
+                "{0} {1} {2}",
+                header,
+                states.Length > 0 ? "//" : string.Empty,
+                states
+            );
+
+            return message;
         }
 
         private List<InstanceState> GetInstanceStates()
         {
-            var elbName = command.Parameters.First();
+            this.elbName = command.Parameters.First();
             var states = elb.InstanceState(elbName);
             if(states != null && states.Count>0)
                 ElbState.UpdateStatus(elbName, states);
