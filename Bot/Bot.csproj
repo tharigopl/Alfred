@@ -112,7 +112,10 @@
     <Compile Include="Infrastructure\AWS\AwsClient.cs" />
     <Compile Include="Infrastructure\AWS\EC2.cs" />
     <Compile Include="Infrastructure\AWS\ELB.cs" />
+    <Compile Include="Infrastructure\AWS\IInstanceAlert.cs" />
     <Compile Include="Infrastructure\AWS\OutTimeState.cs" />
+    <Compile Include="Infrastructure\AWS\S3.cs" />
+    <Compile Include="Infrastructure\AWS\S3InstanceAlert.cs" />
     <Compile Include="Infrastructure\SystemTime.cs" />
     <Compile Include="IrcBot.cs" />
     <Compile Include="IrcBotConfiguration.cs" />
@@ -122,6 +125,7 @@
     <Compile Include="Commands\UnsupportedCommand.cs" />
     <Compile Include="IrcBotUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\InsightInstanceUrlUploadTask.cs" />
     <Compile Include="Tasks\IrcElbStatusTask.cs" />
     <Compile Include="Tasks\IrcTaskMessageEventArgs.cs" />
     <Compile Include="Tasks\IIrcTask.cs" />
