@@ -44,10 +44,17 @@ namespace Bot.Tasks
                     SendMessage(FormatMessage());
                     SaveState();
                 }
+                //UpdateAlerts();
                 RebootExpiredInstances();
 
                 Thread.Sleep(15000);
             }
+        }
+
+        private void UpdateAlerts()
+        {
+            IInstanceAlert alert = new S3InstanceAlert();
+            alert.TryUpdateAlert(this.currentOut);
         }
 
         private void GetState()
@@ -114,7 +121,9 @@ namespace Bot.Tasks
             var tenMinutesAgo = SystemTime.Now().AddMinutes(-10);
 
             var expiredInstances = ElbState.GetStates(this.elbName)
-                                   .Where(s => s.TimeRemoved < tenMinutesAgo && !s.Rebooted)
+                                   .Where(s => 
+                                       tenMinutesAgo > s.TimeRemoved && 
+                                       s.ReadyForReboot(tenMinutesAgo))
                                    .Select(s => s)
                                    .ToList();
 
@@ -132,9 +141,7 @@ namespace Bot.Tasks
             );
 
             foreach (var instance in expiredInstances)
-            {
-                instance.Rebooted = true;
-            }
+                instance.Rebooted();
 
             SendMessage(message);
         }

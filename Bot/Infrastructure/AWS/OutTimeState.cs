@@ -8,11 +8,13 @@ namespace Bot.Infrastructure.AWS
     {
         public InstanceState State { get; internal set; }
         public DateTime TimeRemoved { get; internal set; }
-        public bool Rebooted { get; set;  }
+        public bool HasBeenRebooted { get; private set;  }
+        public DateTime LastRebooted { get; private set; }
+        public int NumberOfReboots { get; private set; }
 
         public OutTimeState(InstanceState state)
         {
-            Rebooted = false;
+            HasBeenRebooted = false;
             TimeRemoved = SystemTime.Now();
             State = state;
         }
@@ -38,8 +40,20 @@ namespace Bot.Infrastructure.AWS
                 "{0} ({1}{2})",
                 State.InstanceId,
                 TimeSincePulled(),
-                Rebooted ? " - rebooted" : string.Empty
+                HasBeenRebooted ? " - rebooted" : string.Empty
             );
+        }
+
+        public void Rebooted()
+        {
+            HasBeenRebooted = true;
+            NumberOfReboots++;
+            LastRebooted = SystemTime.Now();
+        }
+
+        public bool ReadyForReboot(DateTime cutoff)
+        {
+            return !HasBeenRebooted || cutoff > LastRebooted;
         }
 
     }
