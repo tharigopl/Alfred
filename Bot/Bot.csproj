@@ -100,6 +100,7 @@
     <Compile Include="Commands\User\UserRegisterCommand.cs" />
     <Compile Include="Commands\User\UserRegisterHelpCommand.cs" />
     <Compile Include="Data\Database.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Infrastructure\AWS\ElbState.cs" />
     <Compile Include="Data\User.cs" />
     <Compile Include="Data\ModelBase.cs" />

@@ -25,7 +25,7 @@ namespace BotConsoleHost
 
             // upload aws elb status page to s3
             if (!string.IsNullOrEmpty(defaultElb) && !string.IsNullOrEmpty(statusPageBucket))
-                bot.AddTask(new InsightInstanceUrlUploadTask());
+                bot.AddTask(new InsightInstanceUrlUploadTask(defaultElb, statusPageBucket));
 
             // GO!
             bot.Run().Wait();
