@@ -27,28 +27,24 @@ namespace Bot.Tasks
         {
             this.elbName = elbName;
             this.Name = "Elb Status Task";
-            this.action = this.Run;
             
             this.elb = new ELB();
             this.ec2 = new EC2();
+
+            this.SleepTime = TimeSpan.FromSeconds(15);
         }
 
-        public void Run()
+        protected override void Execute()
         {
-            while (!this.cancellationToken.IsCancellationRequested)
+            GetState();
+            UpdateState();
+            if (StateChanged())
             {
-                GetState();
-                UpdateState();
-                if (StateChanged())
-                {
-                    SendMessage(FormatMessage());
-                    SaveState();
-                }
-                //UpdateAlerts();
-                RebootExpiredInstances();
-
-                Thread.Sleep(15000);
+                SendMessage(FormatMessage());
+                SaveState();
             }
+            //UpdateAlerts();
+            RebootExpiredInstances();
         }
 
         private void UpdateAlerts()

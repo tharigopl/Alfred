@@ -22,22 +22,16 @@ namespace Bot.Tasks
 
             this.feedUri = feedUri;
             this.Name = "TeamCityBuild";
-            this.action = this.Run;
         }
 
-        public void Run()
+        protected override void Execute()
         {
-            while (!this.cancellationToken.IsCancellationRequested)
+            var build = GetMostRecentBuild();
+
+            if (IsNewBuild(build))
             {
-                var build = GetMostRecentBuild();
-
-                if (IsNewBuild(build))
-                {
-                    var messages = this.formatter.Format(build);
-                    SendMessages(messages);
-                }
-
-                Thread.Sleep(30000);
+                var messages = this.formatter.Format(build);
+                SendMessages(messages);
             }
         }
 

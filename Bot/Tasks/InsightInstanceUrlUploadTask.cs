@@ -36,22 +36,14 @@ namespace Bot.Tasks
             this.elb = new ELB();
             this.ec2 = new EC2();
             this.s3 = new S3();
-
-            this.action = Run;
         }
 
-        public void Run()
+        protected override void Execute()
         {
-            while (!this.cancellationToken.IsCancellationRequested)
-            {
-                GetInstanceStates();
-                GetDescriptions();
-                FormatUrls();
-                UploadUrls();
-
-                Thread.Sleep(TimeSpan.FromMinutes(1));
-            }
-            
+            GetInstanceStates();
+            GetDescriptions();
+            FormatUrls();
+            UploadUrls();
         }
         
         private void FormatUrls()
@@ -108,7 +100,7 @@ namespace Bot.Tasks
                 }
 
                 sb.AppendFormat(
-                    @"<a href=""http://{0}/""><li class=""{1}"">{2}</li></a>",
+                    @"<a href=""http://{0}/healthcheck""><li class=""{1}"">{2}</li></a>",
                     description.PublicDnsName,
                     status,
                     description.InstanceId

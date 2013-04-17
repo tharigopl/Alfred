@@ -7,21 +7,26 @@ using System.Threading.Tasks;
 
 namespace Bot.Tasks
 {
-    public class IrcTask : IIrcTask
+    public abstract class IrcTask : IIrcTask
     {
         public string Name { get; set; }
         public Task Task { get; private set; }
+
+
+        /// <summary>
+        /// The time to wait between task executions. Defaults to 30s.
+        /// </summary>
+        public TimeSpan SleepTime { get; set; }
         public event EventHandler<IrcTaskMessageEventArgs> OnMessage;
 
-        protected Action action;
         protected CancellationToken cancellationToken;
-
         private CancellationTokenSource tokenSource;
 
-        public IrcTask()
+        protected IrcTask()
         {
             this.tokenSource = new CancellationTokenSource();
             this.cancellationToken = tokenSource.Token;
+            this.SleepTime = TimeSpan.FromSeconds(30);
         }
 
         public bool IsRunning
@@ -44,27 +49,31 @@ namespace Bot.Tasks
 
         public void Start()
         {
-            if (action != null)
-            {
-                Task = Task.Run(() => TryAction(), cancellationToken);
-            }
+            Task = Task.Run(() => TryAction(), cancellationToken);
         }
+
+        protected abstract void Execute();
 
         private void TryAction()
         {
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                action();
-            }
-            catch (Exception ex)
-            {
-                // output this somewhere
-                // HACK: console for now
-                Console.WriteLine(
-                    "Exception in {0}: {1}",
-                    this.Name,
-                    ex.Message
-                );
+                try
+                {
+                    Execute();
+                }
+                catch (Exception ex)
+                {
+                    // output this somewhere
+                    // HACK: console for now
+                    Console.WriteLine(
+                        "Exception in {0}: {1}",
+                        this.Name,
+                        ex.Message
+                        );
+                }
+
+                Thread.Sleep(this.SleepTime);
             }
         }
 
