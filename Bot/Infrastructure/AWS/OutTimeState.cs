@@ -8,9 +8,10 @@ namespace Bot.Infrastructure.AWS
     {
         public InstanceState State { get; internal set; }
         public DateTime TimeRemoved { get; internal set; }
-        public bool HasBeenRebooted { get; private set;  }
         public DateTime LastRebooted { get; private set; }
         public int NumberOfReboots { get; private set; }
+        public bool HasBeenRebooted { get; private set;  }
+        public bool MarkedForRemoval { get; set; }
 
         public OutTimeState(InstanceState state)
         {
