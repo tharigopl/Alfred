@@ -12,7 +12,8 @@ namespace BotConsoleHost
             var config = CreateConfiguration();
             var bot = new IrcBot(config);
             var uriString = ConfigurationManager.AppSettings["feed"];
-            var defaultElb = ConfigurationManager.AppSettings["defaultElb"];
+            var productionElb = ConfigurationManager.AppSettings["productionElbName"];
+            var uatElb = ConfigurationManager.AppSettings["uatElbName"];
             var statusPageBucket = ConfigurationManager.AppSettings["statusPageBucket"];
 
             // report build status
@@ -20,12 +21,15 @@ namespace BotConsoleHost
                 bot.AddTask(new IrcTeamCityBuildStatusTask(new Uri(uriString)));
 
             // report aws elb status
-            if (!string.IsNullOrWhiteSpace(defaultElb))
-                bot.AddTask(new IrcElbStatusTask(defaultElb));
+            if (!string.IsNullOrWhiteSpace(productionElb))
+                bot.AddTask(new IrcElbStatusTask(productionElb));
+
+            if (!string.IsNullOrWhiteSpace(uatElb))
+                bot.AddTask(new IrcElbStatusTask(uatElb));
 
             // upload aws elb status page to s3
-            if (!string.IsNullOrEmpty(defaultElb) && !string.IsNullOrEmpty(statusPageBucket))
-                bot.AddTask(new InsightInstanceUrlUploadTask(defaultElb, statusPageBucket));
+            if (!string.IsNullOrEmpty(productionElb) && !string.IsNullOrEmpty(statusPageBucket))
+                bot.AddTask(new InsightInstanceUrlUploadTask(productionElb, statusPageBucket));
 
             // GO!
             bot.Run().Wait();
