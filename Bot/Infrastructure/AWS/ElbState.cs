@@ -15,17 +15,18 @@ namespace Bot.Infrastructure.AWS
         public static void UpdateStatus(string ElbName, List<InstanceState> states)
         {
             ConcurrentDictionary<string, OutTimeState> elbStatus;
+
             if (!instances.TryGetValue(ElbName, out elbStatus))
             {
                 elbStatus =  new ConcurrentDictionary<string, OutTimeState>();
                 instances.TryAdd(ElbName, elbStatus);
             }
+
             OutTimeState notUsed;
             states.ForEach(instanceState =>
             {
                 if (instanceState.State == "InService")
                 {
-                    
                     elbStatus.TryRemove(instanceState.InstanceId, out notUsed);
                 }
                 else if (instanceState.State == "OutOfService" &&
@@ -33,8 +34,20 @@ namespace Bot.Infrastructure.AWS
                 {
                     elbStatus.TryAdd(instanceState.InstanceId, new OutTimeState(instanceState));
                 }
-
             });
+
+            var instanceList = elbStatus.Values.ToList();
+            foreach (var instance in instanceList)
+            {
+                if (instance.MarkedForRemoval && !states.Any(s => s.InstanceId == instance.State.InstanceId))
+                {
+                    elbStatus.TryRemove(instance.State.InstanceId, out notUsed);
+                }
+                else if (!states.Any(s => s.InstanceId == instance.State.InstanceId))
+                {
+                    instance.MarkedForRemoval = true;
+                }
+            }
         }
 
         public static void Clear()
