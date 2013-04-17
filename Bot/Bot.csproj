@@ -124,6 +124,7 @@
     <Compile Include="Commands\IrcCommandProcessorFactory.cs" />
     <Compile Include="Commands\QuitCommand.cs" />
     <Compile Include="Commands\UnsupportedCommand.cs" />
+    <Compile Include="IrcBotManager.cs" />
     <Compile Include="IrcBotUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\InsightInstanceUrlUploadTask.cs" />

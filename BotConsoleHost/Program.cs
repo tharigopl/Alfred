@@ -2,47 +2,35 @@
 using System.Configuration;
 using Bot;
 using Bot.Tasks;
+using Topshelf;
+using Topshelf.Runtime;
 
 namespace BotConsoleHost
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main()
         {
-            var config = CreateConfiguration();
-            var bot = new IrcBot(config);
-            var uriString = ConfigurationManager.AppSettings["feed"];
-            var productionElb = ConfigurationManager.AppSettings["productionElbName"];
-            var uatElb = ConfigurationManager.AppSettings["uatElbName"];
-            var statusPageBucket = ConfigurationManager.AppSettings["statusPageBucket"];
+            HostFactory.Run(hc => {
+                hc.Service<IrcBotManager>(sc => {
+                    sc.ConstructUsing(name => new IrcBotManager());
+                    sc.WhenStarted(m => m.Start());
+                    sc.WhenStopped(m => m.Stop());
+                });
 
-            // report build status
-            if (!string.IsNullOrWhiteSpace(uriString))
-                bot.AddTask(new IrcTeamCityBuildStatusTask(new Uri(uriString)));
+                hc.StartAutomaticallyDelayed();
+                hc.RunAsLocalSystem();
+                //hc.UseNLog();
 
-            // report aws elb status
-            if (!string.IsNullOrWhiteSpace(productionElb))
-                bot.AddTask(new IrcElbStatusTask(productionElb));
+                hc.EnableServiceRecovery(rc => {
+                    rc.RestartService(1);
+                });
 
-            if (!string.IsNullOrWhiteSpace(uatElb))
-                bot.AddTask(new IrcElbStatusTask(uatElb));
-
-            // upload aws elb status page to s3
-            if (!string.IsNullOrEmpty(productionElb) && !string.IsNullOrEmpty(statusPageBucket))
-                bot.AddTask(new InsightInstanceUrlUploadTask(productionElb, statusPageBucket));
-
-            // GO!
-            bot.Run().Wait();
+                hc.SetDescription("Alfred the IRC bot.");
+                hc.SetDisplayName("Alfred");
+                hc.SetServiceName("Alfred");
+            });
         }
 
-        static IrcBotConfiguration CreateConfiguration()
-        {
-            return new IrcBotConfiguration {
-                NickName = ConfigurationManager.AppSettings["nick"],
-                HostName = ConfigurationManager.AppSettings["host"],
-                Port = int.Parse(ConfigurationManager.AppSettings["port"]),
-                Channel = ConfigurationManager.AppSettings["channel"]
-            };
-        }
     }
 }

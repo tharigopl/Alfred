@@ -14,7 +14,7 @@ using Bot.Tasks;
 
 namespace Bot
 {
-    public class IrcBot
+    public class IrcBot : IDisposable
     {
         public IrcBotConfiguration Configuration { get; private set; }
 
@@ -29,7 +29,7 @@ namespace Bot
         private static IrcCommandProcessorFactory commandProcessorFactory = 
             new IrcCommandProcessorFactory(
                 typeof(IrcCommandProcessor).SubclassesWithAttribute<IrcCommandAttribute>()
-            );
+        );
 
         public IrcBot(IrcBotConfiguration configuration)
         {
@@ -46,16 +46,20 @@ namespace Bot
             this.client = new IrcClient();
         }
 
-        public async Task Run()
+        public void Start()
         {
             SubscribeToClientEvents();
 
-            using (this.client)
-            {
+            //using (this.client)
+            //{
                 Connect();
                 WaitForRegistration();
-                await Start();
-            }
+            //}
+        }
+
+        public void Stop()
+        {
+            this.StopTasks();
         }
 
         public void RegisterUser(IrcBotUser user)
@@ -72,16 +76,6 @@ namespace Bot
             IrcBotUser user;
             this.users.TryGetValue(nickName, out user);
             return user;
-        }
-
-        private async Task Start()
-        {
-            await Task.Run(() => {
-                while (this.IsConnected || this.tasks.Any(t => t.IsRunning))
-                {
-                    Thread.Sleep(250);
-                }
-            });
         }
 
         private void WaitForRegistration()
@@ -133,9 +127,16 @@ namespace Bot
 
         private void SubscribeToClientEvents()
         {
+            this.client.Error += OnError;
             this.client.Registered += OnRegistered;
             this.client.Disconnected += OnDisconnected;
             this.client.RawMessageReceived += OnRawMessageReceived;
+        }
+
+        private void OnError(object sender, IrcErrorEventArgs e)
+        {
+            // HACK : log somewhere, console for now
+            Console.WriteLine("Error occured in IRC client: {0}", e.Error.Message);
         }
 
         private void OnRawMessageReceived(object sender, IrcRawMessageEventArgs e)
@@ -352,6 +353,14 @@ namespace Bot
                         this.client.LocalUser.SendMessage(channel, message);
                     }
                 }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.client != null)
+            {
+                this.client.Dispose();
             }
         }
     }
