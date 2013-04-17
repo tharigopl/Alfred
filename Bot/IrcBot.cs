@@ -258,25 +258,37 @@ namespace Bot
 
         private void HandleCommandException(IrcCommand command, Exception ex)
         {
-            var message = 
-                string.Format(
+            try
+            {
+                var message = string.Format(
                     "{0}, I ran into a bit of a problem with that last request: {1}",
                     command.Source.Name,
                     ex.Message
                 );
 
-            if (ex.InnerException != null) {
-                message = string.Format(
-                    "{0} {1}",
-                    message,
-                    ex.InnerException.Message
+                if (ex.InnerException != null)
+                {
+                    message = string.Format(
+                        "{0} {1}",
+                        message,
+                        ex.InnerException.Message
+                    );
+                }
+
+                this.client.LocalUser.SendMessage(
+                    command.Target,
+                    message.Replace(Environment.NewLine, " ")
                 );
             }
-
-            this.client.LocalUser.SendMessage(
-                command.Target,
-                message.Replace(Environment.NewLine, " ")
-            );
+            catch (Exception secondException)
+            {
+                // HACK: log, console for now
+                Console.WriteLine(
+                    "Exception occured while handling exception from command ({0}): {1}",
+                    command.Name,
+                    secondException.Message
+                );
+            }
         }
 
         private void SubscribeToRegisteredClientEvents(IrcLocalUser user)
