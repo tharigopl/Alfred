@@ -47,6 +47,11 @@ namespace Bot.Tasks
             RebootExpiredInstances();
         }
 
+        protected override void OnPaused()
+        {
+            ElbState.Clear();
+        }
+
         private void UpdateAlerts()
         {
             IInstanceAlert alert = new S3InstanceAlert();

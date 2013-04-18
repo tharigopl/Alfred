@@ -11,6 +11,7 @@ using Bot.Commands;
 using Bot.Commands.Attributes;
 using Bot.Extensions;
 using Bot.Tasks;
+using Topshelf;
 
 namespace Bot
 {
@@ -23,6 +24,7 @@ namespace Bot
 
         private readonly IrcClient client;
         private bool isRegistered;
+        private HostControl hostControl;
 
         private ConcurrentDictionary<string, IrcBotUser> users;
 
@@ -46,20 +48,27 @@ namespace Bot
             this.client = new IrcClient();
         }
 
-        public void Start()
+        public void Start(HostControl hostControl)
         {
+            this.hostControl = hostControl;
             SubscribeToClientEvents();
-
-            //using (this.client)
-            //{
-                Connect();
-                WaitForRegistration();
-            //}
+            Connect();
+            WaitForRegistration();
         }
 
         public void Stop()
         {
             this.StopTasks();
+        }
+
+        public void Pause()
+        {
+            this.tasks.ForEach(t => t.Pause());
+        }
+
+        public void Resume()
+        {
+            this.tasks.ForEach(t => t.Resume());
         }
 
         public void RegisterUser(IrcBotUser user)
@@ -180,6 +189,7 @@ namespace Bot
         private void OnDisconnected(object sender, EventArgs e)
         {
             StopTasks();
+            this.hostControl.Restart();
         }
 
         private void SubscribeToChannelEvents(IrcChannel channel)

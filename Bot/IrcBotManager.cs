@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Configuration;
 using Bot.Tasks;
+using Topshelf;
 
 namespace Bot
 {
     /// <summary>
     /// Responsible for running IRC bots based on system configuration.
     /// </summary>
-    public class IrcBotManager
+    public class IrcBotManager : ServiceControl
     {
         private readonly IrcBot bot;
         private readonly IrcBotConfiguration configuration;
@@ -54,14 +55,16 @@ namespace Bot
             };
         }
 
-        public void Start()
+        public bool Start(HostControl hostControl)
         {
-            this.bot.Start();
+            this.bot.Start(hostControl);
+            return true;
         }
 
-        public void Stop()
+        public bool Stop(HostControl hostControl)
         {
             this.bot.Stop();
+            return true;
         }
     }
 }

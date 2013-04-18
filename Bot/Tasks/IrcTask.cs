@@ -42,6 +42,8 @@ namespace Bot.Tasks
             }
         }
 
+        public bool IsPaused { get; private set; }
+
         public void Stop()
         {
             this.tokenSource.Cancel();
@@ -50,6 +52,19 @@ namespace Bot.Tasks
         public void Start()
         {
             Task = Task.Run(() => TryAction(), cancellationToken);
+        }
+
+        public void Pause()
+        {
+            this.IsPaused = true;
+            OnPaused();
+        }
+
+        protected virtual void OnPaused() { }
+
+        public void Resume()
+        {
+            this.IsPaused = false;
         }
 
         protected abstract void Execute();
@@ -74,6 +89,11 @@ namespace Bot.Tasks
                 }
 
                 Thread.Sleep(this.SleepTime);
+
+                while (this.IsPaused && !cancellationToken.IsCancellationRequested)
+                {
+                    Thread.Sleep(2000);
+                }
             }
         }
 

@@ -12,11 +12,7 @@ namespace BotConsoleHost
         public static void Main()
         {
             HostFactory.Run(hc => {
-                hc.Service<IrcBotManager>(sc => {
-                    sc.ConstructUsing(name => new IrcBotManager());
-                    sc.WhenStarted(m => m.Start());
-                    sc.WhenStopped(m => m.Stop());
-                });
+                hc.Service<IrcBotManager>();
 
                 hc.StartAutomaticallyDelayed();
                 hc.RunAsLocalSystem();
