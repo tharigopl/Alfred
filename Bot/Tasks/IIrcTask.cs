@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Bot.Tasks
 {
-    interface IIrcTask
+    public interface IIrcTask
     {
         string Name { get; set; }
         Task Task { get; }

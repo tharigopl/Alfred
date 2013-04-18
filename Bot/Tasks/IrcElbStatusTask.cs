@@ -17,20 +17,19 @@ namespace Bot.Tasks
     {
         private readonly string elbName;
         private readonly ELB elb;
+        private readonly EC2 ec2;
+
         private int lastIn, currentIn;
         private int lastOut, currentOut;
         private List<InstanceState> states;
         private string statesFormatted;
-        private EC2 ec2;
 
-        public IrcElbStatusTask(string elbName)
+        public IrcElbStatusTask(string elbName, string name = null) 
+            : base(name ?? "ELB Status Task")
         {
             this.elbName = elbName;
-            this.Name = "Elb Status Task";
-            
             this.elb = new ELB();
             this.ec2 = new EC2();
-
             this.SleepTime = TimeSpan.FromSeconds(15);
         }
 
@@ -43,19 +42,11 @@ namespace Bot.Tasks
                 SendMessage(FormatMessage());
                 SaveState();
             }
-            //UpdateAlerts();
-            RebootExpiredInstances();
         }
 
         protected override void OnPaused()
         {
-            ElbState.Clear();
-        }
-
-        private void UpdateAlerts()
-        {
-            IInstanceAlert alert = new S3InstanceAlert();
-            alert.TryUpdateAlert(this.currentOut);
+            ElbState.Clear(this.elbName);
         }
 
         private void GetState()
@@ -115,36 +106,6 @@ namespace Bot.Tasks
             );
 
             return message;
-        }
-
-        private void RebootExpiredInstances()
-        {
-            var tenMinutesAgo = SystemTime.Now().AddMinutes(-10);
-
-            var expiredInstances = ElbState.GetStates(this.elbName)
-                                   .Where(s => 
-                                       tenMinutesAgo > s.TimeRemoved && 
-                                       s.ReadyForReboot(tenMinutesAgo))
-                                   .Select(s => s)
-                                   .ToList();
-
-            var expiredInstanceIds = expiredInstances.Select(s => s.State.InstanceId).ToArray();
-
-            if (expiredInstances.Count <= 0) return;
-
-            this.ec2.RebootInstances(expiredInstanceIds);
-
-            var message = string.Format(
-                "{0} instance{1} out > 10m, rebooting: {2}",
-                expiredInstances.Count,
-                expiredInstances.Count > 1 ? "s" : string.Empty,
-                string.Join(", ", expiredInstances.Select(i => i.Format()))
-            );
-
-            foreach (var instance in expiredInstances)
-                instance.Rebooted();
-
-            SendMessage(message);
         }
         
     }

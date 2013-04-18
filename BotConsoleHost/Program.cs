@@ -16,7 +16,7 @@ namespace BotConsoleHost
 
                 hc.StartAutomaticallyDelayed();
                 hc.RunAsLocalSystem();
-                //hc.UseNLog();
+                hc.UseNLog();
 
                 hc.EnableServiceRecovery(rc => {
                     rc.RestartService(1);

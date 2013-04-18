@@ -16,12 +16,12 @@ namespace Bot.Tasks
         private readonly IIrcMessageFormatter<SyndicationItem> formatter;
         private int lastBuildNumberReported = 0;
 
-        public IrcTeamCityBuildStatusTask(Uri feedUri)
+        public IrcTeamCityBuildStatusTask(Uri feedUri, string name = null)
+            : base(name ?? "TeamCity Build Status Task")
         {
             this.formatter = new BuildStatusFormatter();
 
             this.feedUri = feedUri;
-            this.Name = "TeamCityBuild";
         }
 
         protected override void Execute()

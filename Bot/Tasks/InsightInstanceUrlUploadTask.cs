@@ -25,7 +25,8 @@ namespace Bot.Tasks
         private readonly string loadBalancerName;
         private readonly string bucketName;
 
-        public InsightInstanceUrlUploadTask(string loadBalancerName, string bucketName)
+        public InsightInstanceUrlUploadTask(string loadBalancerName, string bucketName, string taskName = null)
+            : base(taskName ?? "Insight Status Page Task")
         {
             loadBalancerName.Required("loadBalancerName");
             bucketName.Required("bucketName");

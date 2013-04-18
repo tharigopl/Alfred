@@ -29,6 +29,11 @@ namespace Bot.Tasks
             this.SleepTime = TimeSpan.FromSeconds(30);
         }
 
+        protected IrcTask(string name) : this()
+        {
+            this.Name = name ?? "IrcTask";
+        }
+
         public bool IsRunning
         {
             get

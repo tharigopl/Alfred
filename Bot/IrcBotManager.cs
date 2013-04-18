@@ -30,14 +30,40 @@ namespace Bot
 
             // report build status
             if (!string.IsNullOrWhiteSpace(this.teamCityFeedUri))
-                this.bot.AddTask(new IrcTeamCityBuildStatusTask(new Uri(this.teamCityFeedUri)));
+                this.bot.AddTask(new IrcTeamCityBuildStatusTask(
+                    new Uri(this.teamCityFeedUri),
+                    "Insight TeamCity Build Status Task"
+                ));
 
-            // report aws elb status
             if (!string.IsNullOrWhiteSpace(productionElb))
-                this.bot.AddTask(new IrcElbStatusTask(productionElb));
+            {
+                // report production aws elb status
+                this.bot.AddTask(new IrcElbStatusTask(
+                    productionElb,
+                    "Insight Production ELB Status Task"
+                ));
+
+                // reboot unhealthy ec2 instances on production elb
+                this.bot.AddTask(new InsightInstanceMonitor(
+                    productionElb,
+                    "Insight Production Unhealthy EC2 Instance Monitor Task"
+                ));
+            }
 
             if (!string.IsNullOrWhiteSpace(uatElb))
-                this.bot.AddTask(new IrcElbStatusTask(uatElb));
+            {
+                // report uat aws elb status
+                this.bot.AddTask(new IrcElbStatusTask(
+                    uatElb,
+                    "Insight UAT ELB Status Task"
+                ));
+
+                // reboot unhealthy ec2 instances on uat elb
+                this.bot.AddTask(new InsightInstanceMonitor(
+                    uatElb,
+                    "Insight UAT Unhealthy EC2 Instance Monitor Task"
+                ));
+            }
 
             // upload aws elb status page to s3
             if (!string.IsNullOrEmpty(productionElb) && !string.IsNullOrEmpty(this.statusPageBucketName))

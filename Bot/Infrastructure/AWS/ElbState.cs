@@ -55,6 +55,12 @@ namespace Bot.Infrastructure.AWS
             instances.Clear();
         }
 
+        public static void Clear(string elbName)
+        {
+            ConcurrentDictionary<string, OutTimeState> notUsed;
+            instances.TryRemove(elbName, out notUsed);
+        }
+
         public static ICollection<OutTimeState> GetStates(string ElbName)
         {
             ConcurrentDictionary<string, OutTimeState> elbStates;

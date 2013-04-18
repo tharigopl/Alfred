@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using IrcDotNet;
 using System;
@@ -46,6 +47,53 @@ namespace Bot
             this.commandPrefix = string.Format("{0}", this.Configuration.NickName.ToLower());
 
             this.client = new IrcClient();
+        }
+
+        public ReadOnlyCollection<IIrcTask> TaskList
+        {
+            get { return new ReadOnlyCollection<IIrcTask>(this.tasks.ToList()); }
+        } 
+
+        private bool TryFindTask(int index, IrcCommand command, out IIrcTask task)
+        {
+            task = this.tasks.ElementAtOrDefault(index);
+
+            if (task == null)
+            {
+                var message = string.Format(
+                    "I'm sorry, {0}, but I could not find the specified task: {1}",
+                    command.Source.Name,
+                    index
+                );
+                command.Client.LocalUser.SendMessage(
+                    command.Target,
+                    message
+                );
+
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool TryPauseTask(int taskNumber, IrcCommand command, out IIrcTask task)
+        {
+            if (TryFindTask(taskNumber - 1, command, out task) && task.IsRunning)
+            {
+                task.Pause();
+                return true;
+            }
+            return false;
+        }
+
+        public bool TryResumeTask(int taskNumber, IrcCommand command, out IIrcTask task)
+        {
+            if (TryFindTask(taskNumber - 1, command, out task) && task.IsPaused)
+            {
+                task.Resume();
+                return true;
+            }
+            return false;
         }
 
         public void Start(HostControl hostControl)

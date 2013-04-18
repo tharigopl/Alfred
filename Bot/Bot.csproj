@@ -70,6 +70,7 @@
     <Compile Include="Commands\Attributes\AwsElbCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\AwsElbStatusCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\AwsElbRepairCommandAttribute.cs" />
+    <Compile Include="Commands\Attributes\TasksCommandAttribute.cs" />
     <Compile Include="Commands\Attributes\UserCommandAttribute.cs" />
     <Compile Include="Commands\AWS\AwsCommand.cs" />
     <Compile Include="Commands\AWS\AwsElbCommand.cs" />
@@ -98,6 +99,10 @@
     <Compile Include="Commands\ResumeCommand.cs" />
     <Compile Include="Commands\SayCommand.cs" />
     <Compile Include="Commands\SnackCommand.cs" />
+    <Compile Include="Commands\Tasks\TasksCommand.cs" />
+    <Compile Include="Commands\Tasks\TasksHelpCommand.cs" />
+    <Compile Include="Commands\Tasks\TasksPauseCommand.cs" />
+    <Compile Include="Commands\Tasks\TasksResumeCommand.cs" />
     <Compile Include="Commands\User\UserLoginHelpCommand.cs" />
     <Compile Include="Commands\User\UserCommand.cs" />
     <Compile Include="Commands\User\UserHelpCommand.cs" />
@@ -132,6 +137,7 @@
     <Compile Include="IrcBotManager.cs" />
     <Compile Include="IrcBotUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\InsightInstanceMonitor.cs" />
     <Compile Include="Tasks\InsightInstanceUrlUploadTask.cs" />
     <Compile Include="Tasks\IrcElbStatusTask.cs" />
     <Compile Include="Tasks\IrcTaskMessageEventArgs.cs" />
