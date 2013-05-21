@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Bot.Infrastructure;
 using IrcDotNet;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace Bot
     public class IrcBot : IDisposable
     {
         public IrcBotConfiguration Configuration { get; private set; }
+        private bool isRunning;
 
         private readonly string commandPrefix;
         private readonly List<IIrcTask> tasks;
@@ -96,17 +98,54 @@ namespace Bot
             return false;
         }
 
+        private static readonly object runningLock = new object();
+
         public void Start(HostControl hostControl)
         {
-            this.hostControl = hostControl;
-            SubscribeToClientEvents();
-            Connect();
-            WaitForRegistration();
+            if (!isRunning)
+            {
+                lock (runningLock)
+                {
+                    if (!isRunning)
+                    {
+                        this.hostControl = hostControl;
+                        SubscribeToClientEvents();
+                        Connect();
+                        WaitForRegistration();
+                        isRunning = true;
+                    }
+                }
+            }
         }
 
+        // stop can sometimes get called multiple times
+        // ensure the bot is still running before executing
+        // this procedure
         public void Stop()
         {
-            this.StopTasks();
+            if (isRunning)
+            {
+                lock (runningLock)
+                {
+                    if (isRunning)
+                    {
+                        this.StopTasks();
+                        this.client.Quit("service stopped");
+                        this.client.Disconnect();
+                        try
+                        {
+                            while (this.client != null && this.client.IsConnected)
+                            {
+                                Thread.Sleep(500);
+                            }
+                        }
+                        catch
+                        { /* ignore */
+                        }
+                        isRunning = false;
+                    }
+                }
+            }
         }
 
         public void Pause()
@@ -198,6 +237,8 @@ namespace Bot
 
         private void OnRawMessageReceived(object sender, IrcRawMessageEventArgs e)
         {
+            Log.Info("{0} {1}", e.Message.Command, string.Join(" ", e.Message.Parameters));
+
             if (e.Message.Command == "NICK")
             {
                 var oldNick = e.Message.Source.Name;

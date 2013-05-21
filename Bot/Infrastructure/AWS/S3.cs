@@ -28,7 +28,7 @@ namespace Bot.Infrastructure.AWS
                     Key = fileName,
                     ContentBody = contents,
                     ContentType = contentType,
-                    CannedACL =  S3CannedACL.PublicRead
+                    CannedACL =  S3CannedACL.PublicRead,
                 });
             }
             catch (Exception ex)

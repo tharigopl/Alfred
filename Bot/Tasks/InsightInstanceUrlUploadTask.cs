@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,11 +9,15 @@ using Amazon.EC2.Model;
 using Bot.Extensions;
 using Bot.Infrastructure;
 using Bot.Infrastructure.AWS;
+using Bot.Infrastructure.TradeStation;
+using Newtonsoft.Json;
 
 namespace Bot.Tasks
 {
     public class InsightInstanceUrlUploadTask : IrcTask
     {
+        private const string STATS_ENDPOINT = "healthcheck/stats";
+
         private List<RunningInstance> descriptions;
         private List<Amazon.ElasticLoadBalancing.Model.InstanceState> states;
         private Dictionary<string, string> stateMap;
@@ -43,8 +48,9 @@ namespace Bot.Tasks
         {
             GetInstanceStates();
             GetDescriptions();
-            FormatUrls();
-            UploadUrls();
+            //FormatUrls();
+            BuildJson();
+            UploadJson();
         }
         
         private void FormatUrls()
@@ -113,11 +119,106 @@ namespace Bot.Tasks
             this.fileContents = sb.ToString();
         }
 
-        private void UploadUrls()
+        private class InstanceStatus
+        {
+            public string tahitiStatus;
+            public string tahitiTimer;
+            public string webApiStatus;
+            public string url { get; set; }
+            public string publicDns { get; set; }
+            public string status { get; set; }
+            public string instanceId { get; set; }
+        }
+
+        private class InstanceStatusMessage
+        {
+            public string timestamp { get; set; }
+            public List<InstanceStatus> instances { get; set; }
+
+            public InstanceStatusMessage()
+            {
+                instances = new List<InstanceStatus>();
+            }
+        }
+
+        private void BuildJson()
+        {
+            var statusMessage = new InstanceStatusMessage();
+            var elbStates = ElbState.GetStates(loadBalancerName);
+            var stateTimeMap = elbStates.ToDictionary(
+                s => s.State.InstanceId, 
+                s => SystemTime.Now() - s.TimeRemoved
+            );
+
+            foreach (var description in this.descriptions)
+            {
+                if (!this.stateMap.ContainsKey(description.InstanceId))
+                    continue; 
+
+                var instanceStatus = this.stateMap[description.InstanceId];
+                var status = GetInstanceStatusCss(instanceStatus, stateTimeMap, description);
+                var stats = GetStatsForInstance(description.PublicDnsName);
+
+                statusMessage.instances.Add(
+                    new InstanceStatus {
+                        url = string.Format(
+                            "http://{0}/healthcheck",
+                            description.PublicDnsName
+                        ),
+                        publicDns = description.PublicDnsName,
+                        status = status,
+                        instanceId = description.InstanceId,
+                        webApiStatus = stats.WebApiStatus,
+                        tahitiStatus = stats.TahitiStatus,
+                        tahitiTimer = stats.TahitiTimer
+                    }
+                );
+            }
+
+            statusMessage.timestamp = SystemTime.UtcNow.ToString("o");
+
+            this.fileContents = JsonConvert.SerializeObject(statusMessage);
+        }
+
+        private static string GetInstanceStatusCss(string instanceStatus, Dictionary<string, TimeSpan> stateTimeMap, RunningInstance description)
+        {
+            var status = "ok";
+
+            if (instanceStatus != "InService")
+            {
+                status = "warning";
+                if (stateTimeMap.ContainsKey(description.InstanceId) && stateTimeMap[description.InstanceId].Minutes >= 10)
+                {
+                    status = "error";
+
+                    if (stateTimeMap[description.InstanceId].Minutes >= 20)
+                    {
+                        status = "danger";
+                    }
+                }
+            }
+            return status;
+        }
+
+        private WebApiStats GetStatsForInstance(string instanceBaseUrl)
+        {
+            var client = new WebClient();
+            var url = string.Format(
+                    @"http://{0}/{1}",
+                    instanceBaseUrl,
+                    STATS_ENDPOINT
+                );
+            var json = client.DownloadString(url);
+            var stats = JsonConvert.DeserializeObject<WebApiStats>(json);
+
+            return stats;
+        }
+
+        private void UploadJson()
         {
             this.s3.TryPut(
                 bucketName,
-                "index.html",
+                "instances.json",
                 this.fileContents,
                 "text/html"
             );

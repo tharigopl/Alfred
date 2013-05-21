@@ -14,13 +14,17 @@ namespace BotConsoleHost
             HostFactory.Run(hc => {
                 hc.Service<IrcBotManager>();
 
+                /*
                 hc.StartAutomaticallyDelayed();
+                */
                 hc.RunAsLocalSystem();
                 hc.UseNLog();
 
+                /*
                 hc.EnableServiceRecovery(rc => {
                     rc.RestartService(1);
                 });
+                */
 
                 hc.SetDescription("Alfred the IRC bot.");
                 hc.SetDisplayName("Alfred");

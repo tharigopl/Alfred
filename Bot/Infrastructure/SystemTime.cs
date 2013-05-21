@@ -16,6 +16,11 @@ namespace Bot.Infrastructure
             set { now = value; }
         } 
 
+        public static DateTime UtcNow
+        {
+            get { return now().ToUniversalTime();  }
+        } 
+
         public static void Set(DateTime dt)
         {
             now = () => dt;

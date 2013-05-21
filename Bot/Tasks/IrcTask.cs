@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bot.Infrastructure;
 
 namespace Bot.Tasks
 {
@@ -93,11 +94,15 @@ namespace Bot.Tasks
                         );
                 }
 
-                Thread.Sleep(this.SleepTime);
+                var wakeTime = SystemTime.Now().Add(this.SleepTime);
+                while (wakeTime >= SystemTime.Now() && !cancellationToken.IsCancellationRequested)
+                {
+                    Thread.Sleep(1000);
+                }
 
                 while (this.IsPaused && !cancellationToken.IsCancellationRequested)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                 }
             }
         }

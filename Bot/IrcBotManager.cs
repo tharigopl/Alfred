@@ -69,6 +69,7 @@ namespace Bot
             if (!string.IsNullOrEmpty(productionElb) && !string.IsNullOrEmpty(this.statusPageBucketName))
                 this.bot.AddTask(new InsightInstanceUrlUploadTask(productionElb, this.statusPageBucketName));
 
+            //this.bot.AddTask(new InsightInstanceStatsMonitorTask("healthcheck/stats"));
         }
 
         private IrcBotConfiguration CreateConfiguration()
@@ -90,7 +91,9 @@ namespace Bot
         public bool Stop(HostControl hostControl)
         {
             this.bot.Stop();
+            this.bot.Dispose();
             return true;
         }
+
     }
 }
