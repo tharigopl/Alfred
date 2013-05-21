@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Amazon;
 using Amazon.EC2;
 using Amazon.EC2.Model;
@@ -27,14 +25,23 @@ namespace Bot.Infrastructure.AWS
 
         public List<RunningInstance> InstanceDescriptions(IEnumerable<string> instanceIds)
         {
-            var request = new DescribeInstancesRequest().WithInstanceId(instanceIds.ToArray());
-            var response = this.client.DescribeInstances(request);
+            try
+            {
+                var request = new DescribeInstancesRequest().WithInstanceId(instanceIds.ToArray());
+                var response = this.client.DescribeInstances(request);
 
-            return response
-                .DescribeInstancesResult
-                .Reservation
-                .SelectMany(reservation => reservation.RunningInstance)
-                .ToList();
+                return response
+                    .DescribeInstancesResult
+                    .Reservation
+                    .SelectMany(reservation => reservation.RunningInstance)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception occurred getting instance states: ");
+                Console.WriteLine(ex.Message);
+                return new List<RunningInstance>();
+            }
         }
 
         public void RebootInstances(IEnumerable<string> instanceIds)

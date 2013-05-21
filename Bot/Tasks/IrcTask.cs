@@ -94,8 +94,8 @@ namespace Bot.Tasks
                         );
                 }
 
-                var wakeTime = SystemTime.Now().Add(this.SleepTime);
-                while (wakeTime >= SystemTime.Now() && !cancellationToken.IsCancellationRequested)
+                var wakeTime = SystemTime.Now.Add(this.SleepTime);
+                while (wakeTime >= SystemTime.Now && !cancellationToken.IsCancellationRequested)
                 {
                     Thread.Sleep(1000);
                 }

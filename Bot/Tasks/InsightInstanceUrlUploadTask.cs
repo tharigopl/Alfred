@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -53,81 +55,17 @@ namespace Bot.Tasks
             UploadJson();
         }
         
-        private void FormatUrls()
-        {
-            var sb = new StringBuilder();
-
-
-            sb.Append(@"
-                <html><head>
-                    <meta http-equiv=""refresh"" content=""15"" >
-                    <meta name=""viewport"" content=""width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"" />
-                    <style>
-                    body { font-family: 'Courier New'; font-size: 19px; }
-            		p { padding-bottom: 10px; }
-            		ul { list-style-type: none; margin: 0; padding: 0; width: 650px; }
-            		li { display:inline-block; font-size: .75em; margin: 5px; border: 1px dashed Black; width: 100px; height: 100px; text-align: center; line-height: 100px; }
-                    li.ok { background-color: Lime; }
-                    li.warning { background-color: Yellow; }
-                    li.error { background-color: Orange; }
-                    li.danger { background-color: Red; }
-            		a { text-decoration: none; color: Black; }
-                    </style>
-                </head><body>"
-            );
-            sb.AppendFormat(
-                "<p>Last updated: {0} (UTC)</p>", 
-                SystemTime.Now().ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
-            );
-
-            var elbStates = ElbState.GetStates(loadBalancerName);
-            var stateTimeMap = elbStates.ToDictionary(
-                s => s.State.InstanceId, 
-                s => SystemTime.Now() - s.TimeRemoved
-            );
-
-            sb.Append("<ul>");
-            foreach (var description in this.descriptions)
-            {
-                var instanceStatus = this.stateMap[description.InstanceId];
-                var status = "ok";
-
-                if (instanceStatus != "InService")
-                {
-                    status = "warning";
-                    if (stateTimeMap.ContainsKey(description.InstanceId) && stateTimeMap[description.InstanceId].Minutes >= 10)
-                    {
-                        status = "error";
-
-                        if (stateTimeMap[description.InstanceId].Minutes >= 20)
-                        {
-                            status = "danger";
-                        }
-                    }
-                }
-
-                sb.AppendFormat(
-                    @"<a href=""http://{0}/healthcheck""><li class=""{1}"">{2}</li></a>",
-                    description.PublicDnsName,
-                    status,
-                    description.InstanceId
-                );
-            }
-
-            sb.Append("</ul></body></html>");
-
-            this.fileContents = sb.ToString();
-        }
-
         private class InstanceStatus
         {
             public string tahitiStatus;
             public string tahitiTimer;
             public string webApiStatus;
+            public string statusTimer;
             public string url { get; set; }
             public string publicDns { get; set; }
             public string status { get; set; }
             public string instanceId { get; set; }
+            public string graylogUrl { get; set; }
         }
 
         private class InstanceStatusMessage
@@ -147,17 +85,17 @@ namespace Bot.Tasks
             var elbStates = ElbState.GetStates(loadBalancerName);
             var stateTimeMap = elbStates.ToDictionary(
                 s => s.State.InstanceId, 
-                s => SystemTime.Now() - s.TimeRemoved
+                s => SystemTime.Now - s.TimeRemoved
             );
 
-            foreach (var description in this.descriptions)
-            {
+            Parallel.ForEach(this.descriptions, description => {
                 if (!this.stateMap.ContainsKey(description.InstanceId))
-                    continue; 
+                    return;
 
                 var instanceStatus = this.stateMap[description.InstanceId];
                 var status = GetInstanceStatusCss(instanceStatus, stateTimeMap, description);
                 var stats = GetStatsForInstance(description.PublicDnsName);
+                var graylogUrl = GetGraylogUrl(description);
 
                 statusMessage.instances.Add(
                     new InstanceStatus {
@@ -165,19 +103,37 @@ namespace Bot.Tasks
                             "http://{0}/healthcheck",
                             description.PublicDnsName
                         ),
+                        graylogUrl = graylogUrl,
                         publicDns = description.PublicDnsName,
                         status = status,
                         instanceId = description.InstanceId,
                         webApiStatus = stats.WebApiStatus,
                         tahitiStatus = stats.TahitiStatus,
-                        tahitiTimer = stats.TahitiTimer
+                        tahitiTimer = stats.TahitiTimer,
+                        statusTimer = stats.StatsTime
                     }
                 );
-            }
+
+            });
 
             statusMessage.timestamp = SystemTime.UtcNow.ToString("o");
 
             this.fileContents = JsonConvert.SerializeObject(statusMessage);
+        }
+
+        private string GetGraylogUrl(RunningInstance description)
+        {
+            var graylogDns = ConfigurationManager.AppSettings["GraylogDns"];
+            if (string.IsNullOrEmpty(graylogDns))
+                throw new ConfigurationErrorsException("GraylogDns setting is missing from configuration.");
+
+            var host = description.PrivateDnsName.Split('.')[0];
+
+            return string.Format(
+                "http://{0}/messages?filters%5Bseverity%5D=3&filters%5Bhost%5D={1}",
+                graylogDns,
+                host
+            );
         }
 
         private static string GetInstanceStatusCss(string instanceStatus, Dictionary<string, TimeSpan> stateTimeMap, RunningInstance description)
@@ -202,16 +158,29 @@ namespace Bot.Tasks
 
         private WebApiStats GetStatsForInstance(string instanceBaseUrl)
         {
-            var client = new WebClient();
             var url = string.Format(
                     @"http://{0}/{1}",
                     instanceBaseUrl,
                     STATS_ENDPOINT
-                );
-            var json = client.DownloadString(url);
-            var stats = JsonConvert.DeserializeObject<WebApiStats>(json);
+            );
 
-            return stats;
+            try
+            {
+                var sw = new Stopwatch();
+                sw.Start();
+                var client = new WebClientWithTimeout();
+                var json = client.DownloadString(url);
+                sw.Stop();
+                var stats = JsonConvert.DeserializeObject<WebApiStats>(json);
+                stats.StatsTime = sw.ElapsedMilliseconds.ToString();
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                return new WebApiStats {
+                    StatsTime = "error"
+                };
+            }
         }
 
         private void UploadJson()

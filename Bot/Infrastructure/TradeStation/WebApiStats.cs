@@ -11,5 +11,6 @@ namespace Bot.Infrastructure.TradeStation
         public string WebApiStatus { get; set; }
         public string TahitiStatus { get; set; }
         public string TahitiTimer { get; set; }
+        public string StatsTime { get; set; }
     }
 }

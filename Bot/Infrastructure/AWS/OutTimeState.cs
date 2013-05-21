@@ -16,13 +16,13 @@ namespace Bot.Infrastructure.AWS
         public OutTimeState(InstanceState state)
         {
             HasBeenRebooted = false;
-            TimeRemoved = SystemTime.Now();
+            TimeRemoved = SystemTime.Now;
             State = state;
         }
 
         public string TimeSincePulled()
         {
-            var timeSinceRemoved = SystemTime.Now() - TimeRemoved;
+            var timeSinceRemoved = SystemTime.Now - TimeRemoved;
             return FormatTimeSpan(timeSinceRemoved);
         }
 
@@ -49,7 +49,7 @@ namespace Bot.Infrastructure.AWS
         {
             HasBeenRebooted = true;
             NumberOfReboots++;
-            LastRebooted = SystemTime.Now();
+            LastRebooted = SystemTime.Now;
         }
 
         public bool ReadyForReboot(DateTime cutoff)

@@ -30,7 +30,7 @@ namespace Bot.Tasks
 
         private void RebootExpiredInstances()
         {
-            var tenMinutesAgo = SystemTime.Now().AddMinutes(-10);
+            var tenMinutesAgo = SystemTime.Now.AddMinutes(-10);
 
             var expiredInstances = ElbState.GetStates(this.loadBalancerName)
                                    .Where(s => 

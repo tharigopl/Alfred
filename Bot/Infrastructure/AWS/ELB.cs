@@ -44,8 +44,17 @@ namespace Bot.Infrastructure.AWS
             if (string.IsNullOrEmpty(loadBalancerName))
                 throw new ArgumentNullException("loadBalancerName");
 
-            var result = client.DescribeInstanceHealth(new DescribeInstanceHealthRequest(loadBalancerName));
-            return result.DescribeInstanceHealthResult.InstanceStates;
+            try
+            {
+                var result = client.DescribeInstanceHealth(new DescribeInstanceHealthRequest(loadBalancerName));
+                return result.DescribeInstanceHealthResult.InstanceStates;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception occurred getting instance states: ");
+                Console.WriteLine(ex.Message);
+                return new List<InstanceState>();
+            }
         } 
 
         private AmazonElasticLoadBalancing ElbClient()

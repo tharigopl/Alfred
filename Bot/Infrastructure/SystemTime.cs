@@ -10,10 +10,9 @@ namespace Bot.Infrastructure
     {
         private static Func<DateTime> now = () => DateTime.Now;
 
-        public static Func<DateTime> Now
+        public static DateTime Now
         {
-            get { return now;  }
-            set { now = value; }
+            get { return now();  }
         } 
 
         public static DateTime UtcNow

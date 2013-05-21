@@ -137,6 +137,9 @@
     <Compile Include="Infrastructure\Log.cs" />
     <Compile Include="Infrastructure\SystemTime.cs" />
     <Compile Include="Infrastructure\TradeStation\WebApiStats.cs" />
+    <Compile Include="Infrastructure\WebClientWithTimeout.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="IrcBot.cs" />
     <Compile Include="IrcBotConfiguration.cs" />
     <Compile Include="Commands\IrcCommand.cs" />
