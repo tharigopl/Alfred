@@ -168,7 +168,7 @@ namespace Bot.Tasks
             {
                 var sw = new Stopwatch();
                 sw.Start();
-                var client = new WebClientWithTimeout();
+                var client = new WebClientWithTimeout(10000);
                 var json = client.DownloadString(url);
                 sw.Stop();
                 var stats = JsonConvert.DeserializeObject<WebApiStats>(json);
